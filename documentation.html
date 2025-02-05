@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Documentation du Link Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            /* Thème clair */
+            --background: #f7f7f7;
+            --surface: #ffffff;
+            --text-primary: #333333;
+            --text-secondary: #555555;
+            --primary: #0ea5e9;
+            --primary-dark: #0c87c4;
+            --border: #e0e0e0;
+            --code-bg: #272822;
+            --code-text: #f8f8f2;
+            --note-bg: #e7f5ff;
+            --tip-bg: #f0f9eb;
+            --shadow: rgba(0, 0, 0, 0.1);
+            /* Palette étendue */
+            --primary-50: #f0f9ff;
+            --primary-100: #e0f2fe;
+            --primary-200: #bae6fd;
+            --primary-300: #7dd3fc;
+            --primary-400: #38bdf8;
+            --primary-500: #0ea5e9;
+            --primary-600: #0284c7;
+            --primary-700: #0369a1;
+            --primary-800: #075985;
+            --primary-900: #0c4a6e;
+
+            /* Couleurs neutres */
+            --neutral-50: #f8fafc;
+            --neutral-100: #f1f5f9;
+            --neutral-200: #e2e8f0;
+            --neutral-300: #cbd5e1;
+            --neutral-400: #94a3b8;
+            --neutral-500: #64748b;
+            --neutral-600: #475569;
+            --neutral-700: #334155;
+            --neutral-800: #1e293b;
+            --neutral-900: #0f172a;
+        }
+
+        [data-theme="dark"] {
+            --background: #1a1a1a;
+            --surface: #2d2d2d;
+            --code-bg: #1e1e1e;
+            --code-text: #d4d4d4;
+            --note-bg: #1e3a5f;
+            --tip-bg: #1c401f;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --background: var(--neutral-900);
+            --surface: var(--neutral-800);
+            --surface-hover: var(--neutral-700);
+            --text-primary: var(--neutral-50);
+            --text-secondary: var(--neutral-400);
+            --border: var(--neutral-700);
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background);
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Conteneur principal en flex pour la sidebar et le contenu */
+        .main-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: var(--surface);
+            border-right: 1px solid var(--border);
+            padding: 1rem;
+            box-shadow: 2px 0 5px var(--shadow);
+        }
+
+        .sidebar h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .sidebar input[type="search"] {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .sidebar nav ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar nav ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar nav ul li a {
+            text-decoration: none;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .sidebar nav ul li a:hover {
+            color: var(--primary);
+        }
+
+        /* Contenu principal */
+        .content {
+            flex: 1;
+            padding: 2rem;
+            background-color: var(--background);
+        }
+
+        /* Conteneur de la documentation */
+        .doc-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: var(--surface);
+            padding: 2rem 3rem;
+            box-shadow: 0 0 10px var(--shadow);
+            border-radius: 8px;
+        }
+
+        /* Boutons de navigation */
+        .nav-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: scale(0.95) translateY(0);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--surface-hover);
+            border-color: var(--text-secondary);
+        }
+
+        header h1,
+        h2,
+        h3 {
+            color: var(--primary);
+        }
+
+        p,
+        li {
+            color: var(--text-primary);
+        }
+
+        .note,
+        .tip {
+            background-color: var(--note-bg);
+            color: var(--text-primary);
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .tip {
+            background-color: var(--tip-bg);
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            overflow-x: auto;
+            border-radius: 4px;
+        }
+
+        code {
+            font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+        }
+
+        a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: none;
+        }
+
+        header,
+        section,
+        footer {
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+        }
+
+        h2 {
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.3rem;
+            margin-bottom: 1rem;
+        }
+
+        h3 {
+            margin-top: 1.5rem;
+        }
+
+        ul,
+        ol {
+            margin-left: 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        form {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 4px;
+        }
+
+        form div {
+            margin-bottom: 1rem;
+        }
+
+        form label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+
+        form input[type="text"],
+        form input[type="email"],
+        form textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+        }
+
+        form button {
+            background-color: var(--primary);
+            color: #fff;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        form button:hover {
+            background-color: var(--primary-dark);
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #777;
+            border-top: 1px solid var(--border);
+            padding-top: 1rem;
+        }
+    </style>
+    <script>
+        // Theme toggle script (same as before)
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            document.getElementById('themeToggle').addEventListener('click', () => {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <div class="main-wrapper">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <h2>Navigation</h2>
+            <input type="search" placeholder="Search..." aria-label="Search">
+            <nav>
+                <ul>
+                    <li><a href="#main-navigation">Main Navigation</a></li>
+                    <li><a href="#link-management">Link Management</a></li>
+                    <li><a href="#folder-management">Folder Management</a></li>
+                    <li><a href="#notes-management">Notes Management</a></li>
+                    <li><a href="#other-features">Other Features</a></li>
+                    <li><a href="#tips">Tips</a></li>
+                    <li><a href="#support">Support</a></li>
+                    <li><a href="#report-problem">Report a Problem</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content">
+            <div class="doc-container">
+                <!-- Navigation Buttons -->
+                <div class="nav-buttons">
+                    <a href="index.html" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Return to Dashboard</span>
+                    </a>
+                    <button class="btn btn-secondary" id="themeToggle">
+                        <i class="fas fa-moon"></i>
+                        <span>Toggle Theme</span>
+                    </button>
+                </div>
+
+                <!-- Header -->
+                <header>
+                    <h1>Link Dashboard Documentation</h1>
+                    <p>Documentation created by me – an overview of all features and functionality.</p>
+                </header>
+
+                <!-- 1. Main Navigation -->
+                <section id="main-navigation">
+                    <h2>1. Main Navigation</h2>
+                    <p>The interface is designed with simplicity and efficiency in mind. The layout includes a sidebar
+                        and a header:</p>
+                    <h3>Sidebar</h3>
+                    <ul>
+                        <li><strong>Main Menu:</strong> Quickly switch between the “All Links” and “Favorites” views.
+                        </li>
+                        <li><strong>Folders:</strong> Organize your links by categories. Each folder displays the number
+                            of links it contains.</li>
+                        <li><strong>Theme Toggle:</strong> Switch between light and dark modes using the dedicated
+                            button.</li>
+                    </ul>
+                    <h3>Header</h3>
+                    <ul>
+                        <li><strong>New Link:</strong> Click this button to open the form for adding a new link.</li>
+                        <li><strong>Toggle Dates:</strong> Show or hide the date when each link was added.</li>
+                        <li><strong>Notes:</strong> Open the notes panel to manage your personal notes and notebooks.
+                        </li>
+                        <li><strong>Profile &amp; Logout:</strong> Your email is displayed (fetched via Supabase
+                            authentication), and you can open a profile dropdown to log out.</li>
+                    </ul>
+                </section>
+
+                <!-- 2. Link Management -->
+                <section id="link-management">
+                    <h2>2. Link Management</h2>
+                    <h3>Adding a New Link</h3>
+                    <ol>
+                        <li><strong>Open the Form:</strong> Click the “New Link” button in the header.</li>
+                        <li><strong>Enter the Information:</strong>
+                            <ul>
+                                <li><em>Title:</em> Optional. If left blank, the system will extract a title from the
+                                    URL.</li>
+                                <li><em>URL:</em> Type the website address (e.g., <code>example.com</code>). The system
+                                    automatically adds the <code>https://</code> prefix when needed and normalizes the
+                                    URL (removing unnecessary parameters and “www.”).</li>
+                                <li><em>Folder:</em> Choose a folder to assign the link or leave it unassigned.</li>
+                            </ul>
+                        </li>
+                        <li><strong>Submit or Cancel:</strong> Click “Add” to save the link or “Cancel” to dismiss the
+                            form.</li>
+                    </ol>
+                    <h3>Editing or Deleting a Link</h3>
+                    <ul>
+                        <li><strong>Edit:</strong> Click the pencil icon to modify a link’s details.</li>
+                        <li><strong>Delete:</strong> Click the trash icon to remove a link. A confirmation prompt may
+                            appear.</li>
+                    </ul>
+                    <h3>Marking as Favorite</h3>
+                    <p>Click the star icon to add or remove a link from your favorites. Favorite links are displayed in
+                        a dedicated view.</p>
+                    <h3>Additional Actions</h3>
+                    <ul>
+                        <li><strong>Preview:</strong> Opens a modal with a live preview of the website. Preloading can
+                            be enabled for faster access when you have many links.</li>
+                        <li><strong>QR Code:</strong> Generates and allows you to download a QR code for sharing the
+                            link.</li>
+                        <li><strong>Drag &amp; Drop:</strong> Easily reorder your links by dragging and dropping them
+                            into the desired order.</li>
+                        <li><strong>Undo:</strong> Use the keyboard shortcut <code>Ctrl+Z</code> (or <code>Cmd+Z</code>
+                            on Mac) to undo your last action—whether it was adding, editing, or deleting a link.</li>
+                    </ul>
+                </section>
+
+                <!-- 3. Folder Management -->
+                <section id="folder-management">
+                    <h2>3. Folder Management</h2>
+                    <h3>Creating a Folder</h3>
+                    <ol>
+                        <li>Click the “New Folder” button in the sidebar or above the folder list.</li>
+                        <li>Enter a name for your folder (for example, “Work” or “Personal”).</li>
+                        <li>Confirm to create the folder. Once created, you can assign links to it.</li>
+                    </ol>
+                    <h3>Renaming or Deleting a Folder</h3>
+                    <ul>
+                        <li><strong>Rename:</strong> Right-click on a folder and select “Rename” to change its name.
+                        </li>
+                        <li><strong>Delete:</strong> Choose “Delete” from the context menu. All links inside will
+                            automatically be moved back to “All Links.”</li>
+                    </ul>
+                    <h3>Reordering Folders</h3>
+                    <p>Reorder your folders by dragging and dropping them into your preferred sequence.</p>
+                </section>
+
+                <!-- 4. Notes Management -->
+                <section id="notes-management">
+                    <h2>4. Notes Management</h2>
+                    <h3>Using the Notes Panel</h3>
+                    <ul>
+                        <li>Click the “Notes” button in the header to open the notes panel.</li>
+                        <li>Create <strong>Notebooks</strong> to group your notes by topic.</li>
+                        <li>Within each notebook, click “New Note” to add a note.</li>
+                        <li>Edit the note’s title and content using the built-in editor (which supports formatting like
+                            bold, italic, lists, etc.).</li>
+                    </ul>
+                    <h3>Organizing and Rearranging Notes</h3>
+                    <p>Drag and drop notes to reorder them within a notebook or to move them between notebooks. Changes
+                        are saved live and synchronized with Supabase.</p>
+                </section>
+
+                <!-- 5. Other Features -->
+                <section id="other-features">
+                    <h2>5. Other Features</h2>
+                    <h3>Preview and Preloading</h3>
+                    <ul>
+                        <li><strong>Live Preview:</strong> Opens a modal window that displays a live preview of the
+                            linked website.</li>
+                        <li><strong>Preloading:</strong> Enable preloading to fetch and cache preview data, which is
+                            especially useful when managing many links.</li>
+                    </ul>
+                    <h3>Display Options</h3>
+                    <ul>
+                        <li><strong>Theme:</strong> Toggle between light and dark modes using the dedicated button.</li>
+                        <li><strong>Dates:</strong> Choose to display or hide the date a link was added.</li>
+                    </ul>
+                    <h3>Backup and Synchronization</h3>
+                    <p>All changes—including adding, editing, or deleting links, folders, and notes—are saved and
+                        synchronized via Supabase in real time.</p>
+                    <h3>Keyboard Shortcuts</h3>
+                    <p>Use <code>Ctrl+Z</code> (or <code>Cmd+Z</code> on Mac) to undo your last action.</p>
+                </section>
+
+                <!-- 6. Tips -->
+                <section id="tips">
+                    <h2>6. Tips</h2>
+                    <ul>
+                        <li><strong>Keep Organized:</strong> Regularly sort your links into folders to keep your
+                            dashboard tidy.</li>
+                        <li><strong>Use Favorites:</strong> Mark important links as favorites for quick access.</li>
+                        <li><strong>Preview First:</strong> Use the preview function to quickly check a link’s content
+                            without leaving the dashboard.</li>
+                        <li><strong>Notes Are Handy:</strong> Utilize the notes panel to save useful information and
+                            ideas.</li>
+                        <li><strong>Drag &amp; Drop:</strong> Easily reorder links, folders, and notes by dragging and
+                            dropping them.</li>
+                        <li><strong>Automatic URL Processing:</strong> URLs are automatically normalized (adding
+                            protocols, removing “www.”, cleaning up query parameters) to prevent duplicate entries.</li>
+                    </ul>
+                </section>
+
+                <!-- 7. Support -->
+                <section id="support">
+                    <h2>7. Support</h2>
+                    <p>If you have any questions or run into issues, please consult the built-in help or contact me at
+                        the email address provided below.</p>
+                </section>
+
+                <!-- 8. Report a Problem -->
+                <section id="report-problem">
+                    <h2>8. Report a Problem</h2>
+                    <p>If you notice any malfunction or have suggestions for improvements, please use the form below. An
+                        email will be sent to <a href="mailto:chamayou.mathis@gmail.com">chamayou.mathis@gmail.com</a>.
+                    </p>
+                    <form action="mailto:chamayou.mathis@gmail.com" method="post" enctype="text/plain">
+                        <div>
+                            <label for="rp-name">Your Name:</label>
+                            <input type="text" id="rp-name" name="name" required>
+                        </div>
+                        <div>
+                            <label for="rp-email">Your Email:</label>
+                            <input type="email" id="rp-email" name="email" required>
+                        </div>
+                        <div>
+                            <label for="rp-message">Your Message:</label>
+                            <textarea id="rp-message" name="message" rows="5" required></textarea>
+                        </div>
+                        <div>
+                            <button type="submit">Send</button>
+                        </div>
+                    </form>
+                    <p>If your email client does not support form submission, click <a
+                            href="mailto:chamayou.mathis@gmail.com?subject=Report%20a%20Problem">here</a> to send your
+                        message manually.</p>
+                </section>
+
+                <!-- Footer -->
+                <footer>
+                    <p>Link Dashboard © 2025</p>
+                    <p>For any suggestions or feedback, please contact me.</p>
+                </footer>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>

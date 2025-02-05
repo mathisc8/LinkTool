@@ -250,6 +250,11 @@ body {
     padding: var(--sp-1) var(--sp-2);
 }
 
+/* Ajoutez cette règle dans la section des styles de boutons */
+.header-actions a.btn {
+    text-decoration: none;
+}
+
 /* ======================================= */
 /*                SEARCH STYLES            */
 /* ======================================= */
@@ -727,7 +732,7 @@ body {
 
 .empty-state {
     text-align: center;
-    padding: var(--sp-8);
+    padding: var (--sp-8);
     color: var(--text-secondary);
     height: 30vh;
 }
