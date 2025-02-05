@@ -799,9 +799,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           startEditing(links[index], index);
           break;
         case "delete":
-          if (confirm("Are you sure you want to delete this link?")) {
-            await deleteLink(linkId);
-          }
+          await deleteLink(linkId);
+
           break;
         case "copy":
           try {
