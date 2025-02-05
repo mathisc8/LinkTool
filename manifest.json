@@ -1,0 +1,16 @@
+{
+    "name": "LinkTool",
+    "short_name": "LinkTool",
+    "description": "Modern dashboard for managing your favorite links",
+    "start_url": "index.html",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#0ea5e9",
+    "icons": [
+        {
+            "src": "icon.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        }
+    ]
+}

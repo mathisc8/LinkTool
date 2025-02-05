@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Modern dashboard for managing your favorite links">
+    <meta name="theme-color" content="#0ea5e9">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="icon.png">
+    <title>Link Dashboard</title>
+
+    <!-- Preloading fonts and critical resources -->
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Optimisation SEO -->
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="LinkTool">
+    <meta name="keywords" content="bookmark manager, link organizer, productivity tool">
+
+    <!-- Préchargement des ressources critiques -->
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+    <link rel="preload" href="styles.css" as="style">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@latest/dist/umd/supabase.min.js"></script>
+    <!-- Ton script principal -->
+    <script src="scriptV1.js"></script>
+
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <!-- Theme detection script -->
+    <script>
+        // Check and apply the saved theme
+        const savedTheme = localStorage.getItem('theme') ||
+            (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    </script>
+
+    <style>
+        .preload * {
+            transition: none !important;
+        }
+    </style>
+    <script>
+        // Disable transitions during loading
+        document.documentElement.classList.add('preload');
+        window.addEventListener('load', () => {
+            document.documentElement.classList.remove('preload');
+        });
+    </script>
+</head>
+
+<body>
+    <!-- Mobile menu button -->
+    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar simplifiée -->
+    <aside class="sidebar" id="sidebar" aria-expanded="true" aria-label="Main navigation">
+        <div class="sidebar-header">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%230ea5e9' d='M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z'/%3E%3C/svg%3E"
+                alt="LinkTool Logo" class="sidebar-logo">
+            <h2 class="sidebar-title">LinkTool</h2>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="sidebar-section">
+                <h3 class="sidebar-section-title">Navigation</h3>
+                <ul class="sidebar-menu">
+                    <li>
+                        <button class="sidebar-item active" data-view="links">
+                            <i class="fas fa-link"></i>
+                            <span>My Links</span>
+                            <span class="sidebar-badge" id="totalLinksCount">0</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button class="sidebar-item" id="headerFavoritesToggle" data-view="favorites">
+                            <i class="fas fa-star"></i>
+                            <span>Favorites</span>
+                            <span class="sidebar-badge" id="favoritesCount">0</span>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <h3 class="sidebar-section-title">Settings</h3>
+                <ul class="sidebar-menu">
+                    <!-- Add this new button before the other settings -->
+                    <li>
+                        <button class="sidebar-item" id="togglePreloadBtn" data-feature="preload">
+                            <i class="fas fa-bolt"></i>
+                            <span>Preload Previews</span>
+                            <div class="preload-progress" hidden></div>
+                        </button>
+                    </li>
+                    <!-- Add this new button -->
+                    <li>
+                        <button class="sidebar-item" id="togglePreviewBtn" data-feature="preview">
+                            <i class="fas fa-eye"></i>
+                            <span>Show Preview Button</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button class="sidebar-item" id="toggleQrBtn" data-feature="qr">
+                            <i class="fas fa-qrcode"></i>
+                            <span>Show QR Button</span>
+                        </button>
+                    </li>
+                    <!-- <li>
+                        <button class="sidebar-item" id="themeToggle">
+                            <i class="fas fa-moon" aria-hidden="true"></i>
+                            <span>Dark Mode</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button class="sidebar-item" onclick="importerDepuisSupabase()" data-action="import">
+                            <i class="fas fa-file-import"></i>
+                            <span>Import Data</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button class="sidebar-item" onclick="synchroniserLocalStorageVersSupabase()"
+                            data-action="export">
+                            <i class="fas fa-file-export"></i>
+                            <span>Export Data</span>
+                        </button>
+                    </li> -->
+                </ul>
+            </div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" aria-label="Collapse sidebar">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        </div>
+    </aside>
+
+
+    <!-- Container principal -->
+    <main class="main-container" id="mainContainer" role="main">
+        <div class="container">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-content">
+                    <div class="header-title-group">
+                        <h1 class="header-title">Link Dashboard (Beta)</h1>
+                    </div>
+
+                    <!-- Dans la section header-actions, ajouter le bouton d'aide -->
+                    <div class="header-actions">
+                        <button class="btn btn-primary" id="headerAddLinkBtn" aria-label="Add a new link">
+                            <i class="fas fa-plus" aria-hidden="true"></i>
+                            <span>New link</span>
+                        </button>
+
+                        <button class="btn btn-secondary" id="headerThemeToggle" aria-label="Change theme">
+                            <i class="fas fa-moon" aria-hidden="true"></i>
+                            <span>Theme</span>
+                        </button>
+
+                        <!-- Add button to toggle dates -->
+                        <button class="btn btn-secondary" id="toggleDatesBtn" aria-label="Toggle dates">
+                            <i class="fas fa-calendar" aria-hidden="true"></i>
+                            <span>Display Dates</span>
+                        </button>
+
+                        <button class="btn btn-secondary notes-toggle-btn" id="toggleNotesBtn"
+                            aria-label="Toggle notes panel">
+                            <i class="fas fa-sticky-note"></i>
+                            <span>Notes</span>
+                        </button>
+
+                        <div class="profile-dropdown">
+                            <button class="btn btn-secondary" id="profileButton">
+                                <i class="fas fa-user"></i>
+                                <span id="userEmail">Loading...</span>
+                            </button>
+                            <div class="profile-menu" id="profileMenu">
+                                <div class="profile-menu-item">
+                                    <i class="fas fa-user-circle"></i>
+                                    <span>Profile</span>
+                                </div>
+                                <div class="profile-menu-item">
+                                    <i class="fas fa-cog"></i>
+                                    <span>Settings</span>
+                                </div>
+                                <div class="profile-menu-item logout" id="logoutButton">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    <span>Logout</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Folders update -->
+            <div class="folders-container">
+                <div class="folders-header">
+                    <h2 class="folders-title">
+                        <i class="fas fa-folder-tree"></i>
+                        Folders
+                    </h2>
+                    <button class="btn" id="headerAddFolderBtn">
+                        <i class="fas fa-plus"></i>
+                        <span>New folder</span>
+                    </button>
+                </div>
+                <div class="folder-list" id="folderList">
+                    <!-- Les dossiers seront injectés ici -->
+                </div>
+            </div>
+
+            <!-- Search bar -->
+            <div class="form-group search-group">
+                <div class="search-bar">
+                    <label for="searchInput" class="sr-only">Search links</label>
+                    <input type="search" id="searchInput" class="form-control search-input" placeholder="Search ..."
+                        autocomplete="off">
+
+                    <i class="fas fa-search search-icon" aria-hidden="true"></i>
+                </div>
+
+                <div class="search-filters" id="searchFilters" hidden>
+                    <div class="filter-group">
+                        <label>Sort by:</label>
+                        <select id="sortBy" class="form-control">
+                            <option value="date-new">Date (Newest)</option>
+                            <option value="date-old">Date (Oldest)</option>
+                            <option value="alpha-asc">Name (A-Z)</option>
+                            <option value="alpha-desc">Name (Z-A)</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Filter by:</label>
+                        <div class="filter-options">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="filterFavorites">
+                                <span>Favorites only</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="filterNoFolder">
+                                <span>No folder</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="filterToday">
+                                <span>Added today</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label>Date range:</label>
+                        <div class="date-inputs">
+                            <input type="date" id="dateFrom" class="form-control">
+                            <span>to</span>
+                            <input type="date" id="dateTo" class="form-control">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add form -->
+            <div class="card animate-slide" id="addLinkForm" hidden>
+                <div class="card-header">
+                    <h2 class="card-title">New link</h2>
+                </div>
+                <div class="card-body">
+                    <form id="linkForm" autocomplete="off">
+                        <div class="form-group">
+                            <label for="linkTitle" class="form-label">Title</label>
+                            <input type="text" id="linkTitle" class="form-control" minlength="3" maxlength="100"
+                                placeholder="Site name or description">
+                            <small class="text-secondary">Optional - will use domain name if empty</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="linkUrl" class="form-label">URL</label>
+                            <input type="text" id="linkUrl" class="form-control" required placeholder="example.com">
+                            <small class="text-secondary">Simply add the domain name, http:// will be added
+                                automatically</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="linkFolder" class="form-label">Folder</label>
+                            <select id="linkFolder" class="form-control">
+                                <option value="null">No folder</option>
+                                <!-- Folders will be injected here -->
+                            </select>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-plus" aria-hidden="true"></i>
+                                <span>Add</span>
+                            </button>
+                            <button type="button" class="btn btn-secondary" id="cancelBtn">
+                                <i class="fas fa-times" aria-hidden="true"></i>
+                                <span>Cancel</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Links grid -->
+            <main class="links-grid" id="linksGrid" role="main">
+                <!-- Links will be injected here by JavaScript -->
+            </main>
+
+            <!-- Empty state -->
+            <div class="empty-state" id="emptyState" hidden>
+                <i class="fas fa-link empty-icon" aria-hidden="true"></i>
+                <h2>No links saved</h2>
+                <p class="text-secondary">Start by adding your first link</p>
+                <button class="btn btn-primary" style="margin: 6px;"
+                    onclick="document.getElementById('headerAddLinkBtn').click()">
+                    <i class="fas fa-plus" aria-hidden="true"></i>
+                    <span>Add a link</span>
+                </button>
+            </div>
+
+            <!-- Panneau de notes -->
+            <aside class="notes-panel" id="notesPanel">
+                <div class="notes-panel-header">
+                    <h2>Notes</h2>
+                    <button class="btn btn-icon" id="closeNotesBtn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="notebooks-panel">
+                    <div class="notebooks-sidebar">
+                        <div class="notebooks-header">
+                            <h3>Notebooks</h3>
+                            <button class="btn btn-icon" id="createNotebookBtn" title="New Notebook">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <div class="notebooks-list" id="notebooksList">
+                            <div class="notebook-item">
+                                <div class="notebook-title">
+                                    <div class="notebook-title-left">
+                                        <i class="fas fa-book"></i>
+                                        <span class="notebook-name">Notebook Title</span>
+                                    </div>
+                                    <div class="notebook-actions">
+                                        <button class="notebook-action-btn edit" title="Rename">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="notebook-action-btn delete" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                        <i class="fas fa-chevron-down collapse-icon"></i>
+                                    </div>
+                                </div>
+                                <div class="notes-sublist">
+                                    <!-- Notes will be injected here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="note-editor-container">
+                        <div class="editor-toolbar">
+                            <div class="format-group">
+                                <button class="format-btn" data-format="bold" title="Bold">
+                                    <i class="fas fa-bold"></i>
+                                </button>
+                                <button class="format-btn" data-format="italic" title="Italic">
+                                    <i class="fas fa-italic"></i>
+                                </button>
+                                <button class="format-btn" data-format="underline" title="Underline">
+                                    <i class="fas fa-underline"></i>
+                                </button>
+                            </div>
+
+                            <div class="format-group">
+                                <button class="format-btn" data-format="h1" title="Heading 1">
+                                    <i class="fas fa-heading"></i><span>1</span>
+                                </button>
+                                <button class="format-btn" data-format="h2" title="Heading 2">
+                                    <i class="fas fa-heading"></i><span>2</span>
+                                </button>
+                                <button class="format-btn" data-format="h3" title="Heading 3">
+                                    <i class="fas fa-heading"></i><span>3</span>
+                                </button>
+                            </div>
+
+                            <div class="format-group">
+                                <button class="format-btn" data-format="insertUnorderedList" title="Bullet List">
+                                    <i class="fas fa-list-ul"></i>
+                                </button>
+                                <button class="format-btn" data-format="insertOrderedList" title="Numbered List">
+                                    <i class="fas fa-list-ol"></i>
+                                </button>
+                            </div>
+                            <button class="btn btn-primary" id="addNoteBtn">
+                                <i class="fas fa-plus"></i>
+                                <span>New Note</span>
+                            </button>
+                        </div>
+
+                        <div class="editor-content">
+                            <input type="text" id="noteTitle" class="note-title-input" placeholder="Note title...">
+                            <div id="noteEditor" class="note-editor" contenteditable="true"
+                                data-placeholder="Start writing your note here..."></div>
+                        </div>
+
+                        <!-- État vide (aucune note sélectionnée) -->
+                        <div class="note-placeholder" id="notePlaceholder">
+                            <i class="fas fa-book-open"></i>
+                            <h3>No Note Selected</h3>
+                            <p>Select a notebook to start writing notes</p>
+                        </div>
+                    </div>
+                </div>
+
+            </aside>
+        </div>
+
+        <template id="linkCardTemplate">
+            <article class="card link-card animate-fade">
+                <img class="link-icon" alt="" loading="lazy">
+                <div class="link-content">
+                    <h3 class="link-title"></h3>
+                    <p class="link-url"></p>
+                    <p class="link-date"></p>
+                </div>
+                <div class="link-actions">
+                    <button class="btn btn-icon favorite-btn" aria-label="Mark as favorite">
+                        <i class="far fa-star" aria-hidden="true"></i>
+                    </button>
+                    <button class="btn btn-icon edit-btn" aria-label="Edit">
+                        <i class="fas fa-edit" aria-hidden="true"></i>
+                    </button>
+                    <button class="btn btn-icon delete-btn" aria-label="Delete">
+                        <i class="fas fa-trash" aria-hidden="true"></i>
+                    </button>
+                    <button class="btn btn-icon copy-btn" aria-label="Copy URL">
+                        <i class="fas fa-copy" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </article>
+        </template>
+
+        <!-- Toast -->
+        <div class="toast" id="toast" hidden>
+            <i class="toast-icon"></i>
+            <span class="toast-message"></span>
+        </div>
+    </main>
+
+    <!-- Preview Modal -->
+    <div class="preview-modal" id="previewModal">
+        <div class="preview-content">
+            <div class="preview-header">
+                <h3 class="preview-title">Preview</h3>
+                <div class="preview-actions">
+                    <button class="btn btn-icon" id="openInNewTab">
+                        <i class="fas fa-external-link-alt"></i>
+                    </button>
+                    <button class="btn btn-icon" id="closePreview">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="preview-frame-container">
+                <iframe id="previewFrame" class="preview-frame"
+                    sandbox="allow-same-origin allow-scripts allow-popups allow-forms"></iframe>
+                <div class="preview-loading" id="previewLoading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="qr-modal" id="qrModal">
+        <div class="qr-content">
+            <div class="qr-header">
+                <h3 class="qr-title">Share via QR Code</h3>
+                <button class="btn btn-icon" id="closeQrModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="qr-body">
+                <div id="qrcode"></div>
+                <p class="qr-url"></p>
+                <button class="btn btn-primary" id="downloadQr">
+                    <i class="fas fa-download"></i>
+                    <span>Download QR Code</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+</body>
+
+</html>
