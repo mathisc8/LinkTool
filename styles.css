@@ -1216,16 +1216,65 @@ body {
 
 @media (max-width: 768px) {
     .sidebar {
-        transform: translateX(-100%);
+        position: fixed;
+        left: -100%;
+        /* Changement ici : on cache la sidebar hors écran par défaut */
+        width: 85%;
+        /* Limitation de la largeur pour ne pas prendre tout l'écran */
+        max-width: 300px;
+        height: 100%;
+        transition: left 0.3s ease;
+        /* Animation de déplacement */
         z-index: 1000;
+        background: var(--surface);
     }
 
     .sidebar.mobile-visible {
-        transform: translateX(0);
+        left: 0;
+        /* La sidebar apparaît quand la classe mobile-visible est présente */
     }
 
-    .sidebar-collapse-btn {
+    /* Ajout d'un overlay sombre derrière la sidebar */
+    .sidebar-overlay {
         display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .sidebar-overlay.active {
+        display: block;
+        opacity: 1;
+    }
+
+    .main-container {
+        margin-left: 0 !important;
+        width: 100%;
+        transition: transform 0.3s ease;
+    }
+
+    .main-container.sidebar-visible {
+        transform: translateX(85%);
+    }
+
+    /* Amélioration du bouton mobile */
+    .mobile-menu-btn {
+        display: flex;
+        position: fixed;
+        top: var(--sp-4);
+        left: var(--sp-4);
+        z-index: 1001;
+        padding: var(--sp-2);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-sm);
     }
 
     .main-container {
@@ -2201,7 +2250,7 @@ body {
     text-align: center;
     color: var(--text-secondary);
     background: var(--surface);
-    padding: var(--sp-8);
+    padding: var (--sp-8);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
 }

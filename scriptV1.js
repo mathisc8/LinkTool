@@ -1614,36 +1614,78 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function initializeSidebar() {
-    const sidebar = elements.sidebar, main = elements.mainContainer, btn = elements.sidebarCollapseBtn, mobileBtn = elements.mobileMenuBtn;
-    if (!sidebar || !main) return;
-    const isCollapsed = localStorage.getItem("sidebarCollapsed") === "true";
-    if (isCollapsed) {
-      sidebar.classList.add("collapsed");
-      main.classList.add("sidebar-collapsed");
-      sidebar.setAttribute("aria-expanded", "false");
-      const icon = btn?.querySelector("i");
-      if (icon) icon.style.transform = "rotate(180deg)";
+    /* filepath: /c:/Users/A520330/Desktop/LinkTool/scriptV1.js */
+    // ...existing code...
+
+    function initializeSidebar() {
+      const sidebar = elements.sidebar;
+      const main = elements.mainContainer;
+      const btn = elements.sidebarCollapseBtn;
+      const mobileBtn = elements.mobileMenuBtn;
+
+      if (!sidebar || !main) return;
+
+      // Création de l'overlay
+      const overlay = document.createElement('div');
+      overlay.className = 'sidebar-overlay';
+      document.body.appendChild(overlay);
+
+      // Gestion du clic sur le bouton mobile
+      mobileBtn?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        sidebar.classList.toggle("mobile-visible");
+        overlay.classList.toggle("active");
+        const icon = mobileBtn.querySelector("i");
+        if (icon) {
+          icon.classList.toggle("fa-bars");
+          icon.classList.toggle("fa-times");
+        }
+      });
+
+      // Fermeture lors du clic sur l'overlay
+      overlay.addEventListener('click', () => {
+        sidebar.classList.remove("mobile-visible");
+        overlay.classList.remove("active");
+        const icon = mobileBtn.querySelector("i");
+        if (icon) {
+          icon.classList.add("fa-bars");
+          icon.classList.remove("fa-times");
+        }
+      });
+
+      // Gestion des clics en dehors de la sidebar
+      document.addEventListener("click", (e) => {
+        if (window.innerWidth <= 768 &&
+          !sidebar.contains(e.target) &&
+          !mobileBtn.contains(e.target) &&
+          sidebar.classList.contains("mobile-visible")) {
+          sidebar.classList.remove("mobile-visible");
+          overlay.classList.remove("active");
+          const icon = mobileBtn.querySelector("i");
+          if (icon) {
+            icon.classList.add("fa-bars");
+            icon.classList.remove("fa-times");
+          }
+        }
+      });
+
+      // Fermeture de la sidebar lors du redimensionnement
+      window.addEventListener("resize", () => {
+        if (window.innerWidth > 768) {
+          sidebar.classList.remove("mobile-visible");
+          overlay.classList.remove("active");
+          const icon = mobileBtn?.querySelector("i");
+          if (icon) {
+            icon.classList.add("fa-bars");
+            icon.classList.remove("fa-times");
+          }
+        }
+      });
+
+      // ...rest of the existing sidebar initialization code...
     }
-    btn?.addEventListener("click", toggleSidebar);
-    mobileBtn?.addEventListener("click", () => {
-      sidebar.classList.toggle("mobile-visible");
-      const icon = mobileBtn.querySelector("i");
-      if (icon) { icon.classList.toggle("fa-bars"); icon.classList.toggle("fa-times"); }
-    });
-    document.addEventListener("click", e => {
-      if (window.innerWidth <= 768 && !sidebar.contains(e.target) && !mobileBtn.contains(e.target) && sidebar.classList.contains("mobile-visible")) {
-        sidebar.classList.remove("mobile-visible");
-        const icon = mobileBtn.querySelector("i");
-        if (icon) { icon.classList.add("fa-bars"); icon.classList.remove("fa-times"); }
-      }
-    });
-    window.addEventListener("resize", () => {
-      if (window.innerWidth > 768) {
-        sidebar.classList.remove("mobile-visible");
-        const icon = mobileBtn.querySelector("i");
-        if (icon) { icon.classList.add("fa-bars"); icon.classList.remove("fa-times"); }
-      }
-    });
+
+    // ...existing code...
   }
 
   function updateSidebarBadges() {
