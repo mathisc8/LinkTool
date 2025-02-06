@@ -803,8 +803,6 @@ body {
     bottom: var(--sp-4);
     left: 256px;
     width: 32px;
-    bottom: 8px;
-    top: auto;
     height: 32px;
     padding: 0;
     display: flex;
@@ -821,9 +819,7 @@ body {
 }
 
 .sidebar.collapsed .sidebar-collapse-btn {
-    left: 35px;
-    bottom: 8px;
-    top: auto;
+    left: 72px;
     transform: translateX(-50%);
 }
 
@@ -2401,15 +2397,7 @@ body {
         padding: var(--sp-2);
     }
 
-    .sidebar.collapsed .sidebar-collapse-btn {
-        left: 35px;
-        bottom: 8px;
-        top: auto;
-        transform: translateX(-50%);
-    }
-
-    .sidebar-collapse-btn {
-        bottom: 8px;
-        top: auto;
+    .fa-chevron-left {
+        z-index: 10000;
     }
 }
