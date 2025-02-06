@@ -34,19 +34,16 @@
     --neutral-800: #1e293b;
     --neutral-900: #0f172a;
 
-    /* Semantic colors with variations */
+    /* Semantic colors */
     --success: #22c55e;
     --success-light: #86efac;
     --success-dark: #15803d;
-
     --warning: #eab308;
     --warning-light: #fde047;
     --warning-dark: #ca8a04;
-
     --error: #ef4444;
     --error-light: #fca5a5;
     --error-dark: #dc2626;
-
     --info: #3b82f6;
     --info-light: #93c5fd;
     --info-dark: #2563eb;
@@ -73,27 +70,16 @@
 
     /* Spacing */
     --sp-1: 0.25rem;
-    /*  4px */
     --sp-2: 0.5rem;
-    /*  8px */
     --sp-3: 0.75rem;
-    /* 12px */
     --sp-4: 1rem;
-    /* 16px */
     --sp-5: 1.25rem;
-    /* 20px */
     --sp-6: 1.5rem;
-    /* 24px */
     --sp-8: 2rem;
-    /* 32px */
     --sp-10: 2.5rem;
-    /* 40px */
     --sp-12: 3rem;
-    /* 48px */
     --sp-16: 4rem;
-    /* 64px */
     --sp-20: 5rem;
-    /* 80px */
 
     /* Shadows */
     --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -132,17 +118,11 @@
 
     /* Font sizes */
     --text-xs: 0.75rem;
-    /* 12px */
     --text-sm: 0.875rem;
-    /* 14px */
     --text-base: 1rem;
-    /* 16px */
     --text-lg: 1.125rem;
-    /* 18px */
     --text-xl: 1.25rem;
-    /* 20px */
     --text-2xl: 1.5rem;
-    /* 24px */
 
     /* Line heights */
     --leading-none: 1;
@@ -151,7 +131,7 @@
     --leading-relaxed: 1.75;
 }
 
-/* Prevent Flash Of Unstyled Content (FOUC) */
+/* Prévenir le FOUC */
 .js-loading * {
     transition: none !important;
 }
@@ -166,7 +146,7 @@
     --border: var(--neutral-700);
 }
 
-/* Reset */
+/* Reset global */
 *,
 *::before,
 *::after {
@@ -184,7 +164,7 @@ html {
 body {
     min-height: 100%;
     margin: 0;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: var(--font-sans);
     line-height: 1.5;
     color: var(--text-primary);
     background: var(--background);
@@ -194,7 +174,6 @@ body {
 /* ======================================= */
 /*                 LAYOUT                  */
 /* ======================================= */
-
 .container {
     width: 100%;
     max-width: 1500px;
@@ -205,7 +184,6 @@ body {
 /* ======================================= */
 /*               HEADER STYLES             */
 /* ======================================= */
-
 .header {
     background: rgba(var(--surface), 0.95);
     border-bottom: 1px solid var(--border);
@@ -250,7 +228,6 @@ body {
     padding: var(--sp-1) var(--sp-2);
 }
 
-/* Ajoutez cette règle dans la section des styles de boutons */
 .header-actions a.btn {
     text-decoration: none;
 }
@@ -258,7 +235,6 @@ body {
 /* ======================================= */
 /*                SEARCH STYLES            */
 /* ======================================= */
-
 .search-container {
     margin-bottom: var(--sp-6);
     position: sticky;
@@ -300,7 +276,7 @@ body {
     transform: translateY(-50%) scale(1.05);
 }
 
-/* Search Filters Styles */
+/* Search Filters */
 .search-bar {
     position: relative;
     display: flex;
@@ -315,6 +291,14 @@ body {
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-md);
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.search-filters.visible {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .filter-group {
@@ -380,67 +364,9 @@ body {
     transform: rotate(180deg);
 }
 
-/* Animation pour les filtres */
-.search-filters {
-    opacity: 0;
-    transform: translateY(-10px);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.search-filters.visible {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-/* Active filter styles */
-.active-filter {
-    position: absolute;
-    top: -30px;
-    left: 0;
-    background: var(--primary);
-    color: var(--primary-contrast);
-    padding: var(--sp-2) var(--sp-4);
-    border-radius: var(--radius-md);
-    font-size: 0.875rem;
-    display: flex;
-    align-items: center;
-    gap: var(--sp-2);
-    animation: slideDown 0.3s ease;
-    z-index: 1;
-}
-
-.active-filter .filter-text {
-    font-weight: 500;
-}
-
-.active-filter .clear-filter {
-    padding: 2px;
-    color: var(--primary-contrast);
-    opacity: 0.8;
-    transition: opacity 0.2s ease;
-}
-
-.active-filter .clear-filter:hover {
-    opacity: 1;
-}
-
-@keyframes slideDown {
-    from {
-        transform: translateY(-10px);
-        opacity: 0;
-    }
-
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
-
-
 /* ======================================= */
 /*                 FORMS                   */
 /* ======================================= */
-
 .form-group {
     margin-bottom: var(--sp-4);
 }
@@ -477,15 +403,12 @@ body {
 /* ======================================= */
 /*                 BUTTONS                 */
 /* ======================================= */
-
 .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: var(--sp-2);
     padding: var(--sp-2) var(--sp-4);
-    /* padding-top: var(--sp-1);
-    padding-bottom: var(--sp-1); */
     border-radius: var(--radius-md);
     font-size: 0.875rem;
     font-weight: 500;
@@ -498,6 +421,21 @@ body {
 .btn:focus-visible {
     outline: 2px solid var(--primary);
     outline-offset: 2px;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.btn:active {
+    transform: scale(0.95);
+}
+
+.btn.active,
+.btn.active:hover {
+    background: var(--primary);
+    color: var(--primary-contrast);
+    border-color: var(--primary);
 }
 
 .btn-primary {
@@ -532,18 +470,7 @@ body {
     background: var(--surface-hover);
 }
 
-.btn:active {
-    transform: scale(0.95);
-}
-
-.btn.active,
-.btn.active:hover {
-    background: var(--primary);
-    color: var(--primary-contrast);
-    border-color: var(--primary);
-}
-
-/* Styles pour le préchargement */
+/* Préchargement */
 .preload-progress {
     position: absolute;
     bottom: 0;
@@ -566,8 +493,14 @@ body {
 /* ======================================= */
 /*                 CARDS                   */
 /* ======================================= */
+.card,
+.card.link-card,
+.link-card,
+.modal,
+.toast {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
 
-/* Drag & drop states */
 .card.link-card.dragging {
     opacity: 0.5;
     border: 2px dashed #000;
@@ -577,16 +510,11 @@ body {
     border: 2px dashed #4CAF50;
 }
 
-.card.link-card {
-    transition: all 0.2s ease;
-}
-
 .card {
     background: var(--surface);
     border-radius: var(--radius-lg);
     border: 1px solid var(--border);
     overflow: hidden;
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, border-color 0.3s ease;
     padding: var(--sp-3);
 }
 
@@ -608,7 +536,6 @@ body {
 /* ======================================= */
 /*              LINKS GRID                 */
 /* ======================================= */
-
 .links-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -664,7 +591,7 @@ body {
 
 .link-url {
     font-size: 0.875rem;
-    color: var (--text-secondary);
+    color: var(--text-secondary);
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
@@ -684,7 +611,7 @@ body {
     gap: var(--sp-1);
     opacity: 0;
     transform: translateY(5px);
-    transition: opacity 0.2s ease, transform 0.8s ease;
+    transition: opacity 0.2s ease, transform 0.3s ease;
 }
 
 .link-card:hover .link-actions {
@@ -693,7 +620,6 @@ body {
 }
 
 .link-card:hover .link-title {
-    white-space: nowrap;
     padding-right: 130px;
     transition: all 0.2s ease;
 }
@@ -725,24 +651,22 @@ body {
 /* ======================================= */
 /*               EMPTY STATE               */
 /* ======================================= */
-
 .empty-state {
     text-align: center;
-    padding: var (--sp-8);
+    padding: var(--sp-8);
     color: var(--text-secondary);
     height: 30vh;
 }
 
 .empty-icon {
     font-size: 3rem;
-    margin-bottom: var (--sp-4);
-    color: var (--text-secondary);
+    margin-bottom: var(--sp-4);
+    color: var(--text-secondary);
 }
 
 /* ======================================= */
 /*                 TOAST                   */
 /* ======================================= */
-
 .toast {
     position: fixed;
     bottom: var(--sp-4);
@@ -758,7 +682,6 @@ body {
     min-width: 300px;
     transform: translateY(100%);
     opacity: 0;
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     z-index: 9999;
 }
 
@@ -783,158 +706,6 @@ body {
     color: var(--error);
 }
 
-/* ======================================= */
-/*               UTILITIES                 */
-/* ======================================= */
-
-.text-secondary {
-    color: var(--text-secondary);
-}
-
-.sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-}
-
-/* Animations */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
-}
-
-@keyframes slideIn {
-    from {
-        transform: translateY(-20px);
-        opacity: 0;
-    }
-
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
-
-@keyframes scaleIn {
-    from {
-        transform: scale(0.9);
-        opacity: 0;
-    }
-
-    to {
-        transform: scale(1);
-        opacity: 1;
-    }
-}
-
-@keyframes bounceIn {
-    0% {
-        transform: scale(0.3);
-        opacity: 0;
-    }
-
-    50% {
-        transform: scale(1.05);
-    }
-
-    70% {
-        transform: scale(0.9);
-    }
-
-    100% {
-        transform: scale(1);
-        opacity: 1;
-    }
-}
-
-@keyframes staggeredFadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes bounce {
-
-    0%,
-    100% {
-        transform: scale(1);
-    }
-
-    50% {
-        transform: scale(1.2);
-    }
-}
-
-.animate-fade {
-    animation: fadeIn 0.3s ease forwards;
-}
-
-.animate-slide {
-    animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-
-.animate-scale {
-    animation: scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-
-.animate-bounce {
-    animation: bounceIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-
-.link-card.animate {
-    animation: staggeredFadeIn 0.5s ease forwards;
-}
-
-/* Amélioration des transitions globales */
-.card,
-.btn,
-.link-card,
-.modal,
-.toast {
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.btn:hover {
-    transform: translateY(-2px);
-}
-
-.btn:active {
-    transform: scale(0.95) translateY(0);
-}
-
-.modal {
-    animation: modalIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-@keyframes modalIn {
-    from {
-        opacity: 0;
-        transform: scale(0.95) translateY(-10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-    }
-}
-
 .toast {
     transform-origin: bottom right;
 }
@@ -956,9 +727,8 @@ body {
 }
 
 /* ======================================= */
-/*              SIDEBAR                  */
+/*               SIDEBAR                 */
 /* ======================================= */
-
 .sidebar {
     position: fixed;
     left: 0;
@@ -1214,27 +984,23 @@ body {
     border-color: var(--border);
 }
 
+/* Responsive Sidebar & Main container */
 @media (max-width: 768px) {
     .sidebar {
         position: fixed;
         left: -100%;
-        /* Changement ici : on cache la sidebar hors écran par défaut */
         width: 85%;
-        /* Limitation de la largeur pour ne pas prendre tout l'écran */
         max-width: 300px;
         height: 100%;
         transition: left 0.3s ease;
-        /* Animation de déplacement */
         z-index: 1000;
         background: var(--surface);
     }
 
     .sidebar.mobile-visible {
         left: 0;
-        /* La sidebar apparaît quand la classe mobile-visible est présente */
     }
 
-    /* Ajout d'un overlay sombre derrière la sidebar */
     .sidebar-overlay {
         display: none;
         position: fixed;
@@ -1263,7 +1029,6 @@ body {
         transform: translateX(85%);
     }
 
-    /* Amélioration du bouton mobile */
     .mobile-menu-btn {
         display: flex;
         position: fixed;
@@ -1277,10 +1042,6 @@ body {
         box-shadow: var(--shadow-sm);
     }
 
-    .main-container {
-        margin-left: 0 !important;
-    }
-
     .header {
         position: sticky;
         top: 0;
@@ -1288,7 +1049,7 @@ body {
     }
 }
 
-/* Mobile menu button */
+/* Mobile menu button for larger screens */
 .mobile-menu-btn {
     display: none;
     padding: var(--sp-2);
@@ -1302,17 +1063,12 @@ body {
 @media (max-width: 768px) {
     .mobile-menu-btn {
         display: block;
-        position: fixed;
-        top: var(--sp-4);
-        left: var(--sp-4);
-        z-index: 1001;
     }
 }
 
 /* ======================================= */
 /*               DATE STYLES               */
 /* ======================================= */
-
 .link-date {
     font-size: 0.75rem;
     color: var(--text-secondary);
@@ -1322,7 +1078,6 @@ body {
 /* ======================================= */
 /*               NOTES PANEL               */
 /* ======================================= */
-
 .notes-panel {
     position: fixed;
     top: 0;
@@ -1523,17 +1278,6 @@ body {
     color: var(--error);
 }
 
-.notebook-action-btn:hover {
-    color: var(--text-primary);
-    background: var(--surface-hover);
-    transform: scale(1.1);
-}
-
-.notebook-action-btn.delete:hover {
-    color: var(--error);
-    background: rgba(239, 68, 68, 0.1);
-}
-
 .notes-sublist {
     margin-left: var(--sp-4);
     padding-left: var(--sp-4);
@@ -1608,7 +1352,6 @@ body {
 /* ======================================= */
 /*             NOTES EDITOR              */
 /* ======================================= */
-
 .note-editor-container {
     flex: 1;
     display: flex;
@@ -1616,6 +1359,7 @@ body {
     background: var(--surface);
     position: relative;
     overflow: hidden;
+    border-radius: var(--radius-lg);
 }
 
 .editor-toolbar {
@@ -1641,7 +1385,6 @@ body {
     background-color: var(--surface);
     border-right: 1px solid var(--border);
     border-radius: var(--radius-md);
-    /* Ajout de la propriété isolation pour créer un nouveau stacking context */
     isolation: isolate;
 }
 
@@ -1663,9 +1406,7 @@ body {
     border: 1px solid transparent;
     border-radius: var(--radius-md);
     cursor: pointer;
-    /* Amélioration de la transition */
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    /* Meilleure accessibilité */
     user-select: none;
     -webkit-tap-highlight-color: transparent;
 }
@@ -1691,20 +1432,7 @@ body {
     border-color: var(--primary);
 }
 
-/* Support du mode sombre */
-@media (prefers-color-scheme: dark) {
-    .format-btn:hover {
-        background-color: rgba(255, 255, 255, 0.1);
-    }
-}
-
-/* Support des appareils tactiles */
-@media (hover: none) {
-    .format-btn:hover {
-        transform: none;
-    }
-}
-
+/* (Support mode sombre et tactile via media queries déjà présentes) */
 .editor-content {
     flex: 1;
     display: flex;
@@ -1712,7 +1440,7 @@ body {
     padding: var(--sp-6);
     overflow-y: auto;
     color: var(--text-primary);
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Inter', var(--font-sans);
     font-size: 1rem;
     line-height: 1.7;
     background: transparent;
@@ -1793,45 +1521,9 @@ body {
     line-height: 1.6;
 }
 
-/* (Les styles de glissement pour les notes ont été commentés dans l’original) */
-
-/* Responsive styles for Notes Editor */
-@media (max-width: 1200px) {
-    .notes-panel {
-        width: 100%;
-    }
-
-    .main-container.notes-open {
-        padding-right: 0;
-    }
-}
-
-@media (max-width: 768px) {
-    .notebooks-panel {
-        flex-direction: column;
-    }
-
-    .notebooks-sidebar {
-        width: 100%;
-        height: auto;
-        max-height: 40vh;
-    }
-
-    .editor-toolbar {
-        height: auto;
-        padding: var(--sp-2);
-    }
-
-    .format-group {
-        flex-wrap: wrap;
-        padding: var(--sp-2);
-    }
-}
-
 /* ======================================= */
-/*            FOLDERS STYLES             */
+/*               FOLDERS STYLES            */
 /* ======================================= */
-
 .folder-item .btn.dragging {
     opacity: 0.5;
     border: 2px dashed #000;
@@ -1899,7 +1591,7 @@ body {
 
 #addFolderBtn i {
     font-size: 0.75rem;
-    margin-right: var (--sp-2);
+    margin-right: var(--sp-2);
 }
 
 .folder-list,
@@ -1929,28 +1621,17 @@ body {
     min-height: 36px;
     line-height: 1;
     position: relative;
-    transition: background-color 0.3s ease,
-        border-color 0.3s ease,
-        color 0.3s ease,
-        transform 0.3s ease,
-        box-shadow 0.3s ease;
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Effet au survol */
 .folder-item .btn:hover {
     background: var(--surface-hover);
-    /* Couleur de fond au survol */
     border-color: var(--primary);
-    /* Changement de la bordure */
     color: var(--primary);
-    /* Texte en couleur primaire */
     transform: translateY(-2px);
-    /* Légère translation vers le haut */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    /* Ombre douce pour accentuer le survol */
 }
 
-/* Bouton actif ou sélectionné */
 .folder-item .btn.active {
     background: var(--primary);
     color: var(--primary-contrast);
@@ -1959,10 +1640,8 @@ body {
     transform: translateY(-2px);
 }
 
-/* Optionnel : état actif au clic pour un feedback immédiat */
 .folder-item .btn:active {
     transform: translateY(0);
-    /* Retour à la position initiale lors du clic */
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
@@ -2041,7 +1720,6 @@ body {
     color: white;
 }
 
-/* Styles pour renommage et boutons */
 .folder-rename-input {
     position: absolute;
     top: 0;
@@ -2086,21 +1764,25 @@ body {
 /* ======================================= */
 /*                 MODAL                 */
 /* ======================================= */
-
-.modal {
+.modal,
+.preview-modal,
+.qr-modal {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
+    z-index: 3000;
+    transition: all 0.3s ease;
+}
+
+.modal {
     background: rgba(0, 0, 0, 0.5);
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 3000;
     opacity: 0;
     visibility: hidden;
-    transition: all 0.3s ease;
 }
 
 .modal.animate-fade {
@@ -2175,18 +1857,12 @@ body {
     box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
 }
 
-/* Preview Modal Styles */
+/* Preview Modal */
 .preview-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
     background: rgba(0, 0, 0, 0.75);
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 3000;
     opacity: 0;
     visibility: hidden;
     transition: all 0.3s ease;
@@ -2207,6 +1883,7 @@ body {
     flex-direction: column;
     transform: scale(0.95);
     transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    overflow: hidden;
 }
 
 .preview-modal.active .preview-content {
@@ -2250,38 +1927,6 @@ body {
     text-align: center;
     color: var(--text-secondary);
     background: var(--surface);
-    padding: var (--sp-8);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg);
-}
-
-.preview-error i {
-    font-size: 3rem;
-    margin-bottom: var(--sp-4);
-    color: var(--error);
-}
-
-.preview-error p {
-    margin-bottom: var(--sp-4);
-}
-
-.preview-modal .preview-content {
-    background: var(--surface);
-    border-radius: var(--radius-lg);
-    width: 90%;
-    height: 90%;
-    position: relative;
-    overflow: hidden;
-}
-
-.preview-error {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    color: var(--text-secondary);
-    background: var(--surface);
     padding: var(--sp-8);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
@@ -2311,18 +1956,12 @@ body {
     color: var(--primary);
 }
 
-/* QR Code Modal Styles */
+/* QR Code Modal */
 .qr-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
     background: rgba(0, 0, 0, 0.75);
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 3000;
     opacity: 0;
     visibility: hidden;
     transition: all 0.3s ease;
@@ -2374,76 +2013,19 @@ body {
 }
 
 .qr-url {
-    color: var (--text-secondary);
+    color: var(--text-secondary);
     font-size: 0.875rem;
     text-align: center;
     word-break: break-all;
 }
 
-/* Dark theme support */
 [data-theme="dark"] #qrcode {
     background: white;
-}
-
-/* Styles manquants pour le panel de notes */
-.note-editor-container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    background: var(--surface);
-    border-radius: var(--radius-lg);
-}
-
-.editor-toolbar {
-    display: flex;
-    gap: var (--sp-4);
-    padding: var(--sp-4);
-    border-bottom: 1px solid var(--border);
-    flex-wrap: wrap;
-}
-
-.format-group {
-    display: flex;
-    gap: var (--sp-1);
-}
-
-.format-btn {
-    padding: var(--sp-2) var (--sp-3);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    background: var(--surface);
-    color: var(--text-primary);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: var(--sp-1);
-    transition: all 0.2s ease;
-}
-
-.format-btn:hover {
-    border-color: var(--primary);
-    color: var(--primary);
-}
-
-.format-btn.active {
-    background: var(--primary);
-    color: var(--primary-contrast);
-    border-color: var(--primary);
-}
-
-.format-btn i {
-    font-size: 0.875rem;
-}
-
-.format-btn span {
-    font-size: 0.75rem;
-    font-weight: 500;
 }
 
 /* ======================================= */
 /*               LOGIN STYLES              */
 /* ======================================= */
-
 .login-container {
     display: flex;
     align-items: center;
@@ -2518,7 +2100,7 @@ body {
     color: var(--success-dark);
 }
 
-/* Profile dropdown styles */
+/* Profile dropdown */
 .profile-dropdown {
     position: relative;
     padding: 0;
@@ -2564,10 +2146,11 @@ body {
     color: var(--error);
 }
 
-/* Responsive styles for mobile devices */
+/* Responsive Mobile Optimizations */
 @media (max-width: 768px) {
     .main-container {
         padding: var(--sp-2);
+        margin-left: 0 !important;
     }
 
     .header {
@@ -2592,14 +2175,10 @@ body {
         min-width: 120px;
     }
 
-    /* Notes Panel Mobile Styles */
     .notes-panel {
         width: 100%;
         height: 100%;
         z-index: 2100;
-    }
-
-    .notes-panel.open {
         position: fixed;
         top: 0;
         left: 0;
@@ -2645,7 +2224,6 @@ body {
         padding: var(--sp-3);
     }
 
-    /* Improved mobile folder display */
     .folders-container {
         margin: var(--sp-4) 0;
     }
@@ -2659,7 +2237,6 @@ body {
         justify-content: space-between;
     }
 
-    /* Links grid mobile optimization */
     .links-grid {
         grid-template-columns: 1fr;
         gap: var(--sp-3);
@@ -2667,73 +2244,34 @@ body {
 
     .link-card {
         padding: var(--sp-3);
+        overflow: hidden;
     }
 
-    .link-actions {
-        position: relative;
-        top: 0;
-        right: 0;
-        opacity: 1;
-        margin-top: var(--sp-2);
-        justify-content: flex-end;
-    }
-
-    /* Mobile search improvements */
-    .search-group {
-        position: sticky;
-        top: 0;
-        z-index: 100;
-        margin: var(--sp-4) 0;
-    }
-
-    .search-filters {
-        position: absolute;
-        width: 100%;
-        z-index: 101;
-    }
-
-    /* Profile dropdown mobile optimization */
-    .profile-dropdown {
-        width: 100%;
-    }
-
-    .profile-menu {
+    .sidebar {
         width: 100%;
         position: fixed;
-        bottom: 0;
         left: 0;
-        right: 0;
-        transform: translateY(100%);
-        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        top: 0;
+        height: auto;
+        transform: translateX(0);
+        z-index: 1000;
     }
 
-    .profile-menu.active {
-        transform: translateY(0);
-    }
-
-    /* Toast mobile positioning */
-    .toast {
-        bottom: var(--sp-4);
-        left: var(--sp-4);
+    .sidebar-collapse-btn {
+        display: flex;
         right: var(--sp-4);
-        width: auto;
+        left: auto;
+        bottom: var(--sp-4);
+        z-index: 1002;
     }
 
-    /* QR and Preview modals mobile optimization */
-    .preview-modal .preview-content,
-    .qr-modal .qr-content {
-        width: 95%;
-        height: 95%;
-        margin: auto;
-    }
-
-    .qr-content {
-        max-width: 320px;
-        width: 90%;
+    .mobile-menu-btn {
+        top: 10px;
+        left: 10px;
+        padding: var(--sp-1);
     }
 }
 
-/* Additional tablet optimizations */
 @media (min-width: 769px) and (max-width: 1024px) {
     .links-grid {
         grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -2748,7 +2286,6 @@ body {
     }
 }
 
-/* Landscape mode optimizations */
 @media (max-height: 600px) and (orientation: landscape) {
     .notebooks-panel {
         flex-direction: row;
@@ -2764,18 +2301,12 @@ body {
     }
 }
 
-/* ======================================= */
-/*       Optimisations pour très petits    */
-/*               écrans mobiles            */
-/* ======================================= */
+/* Très petits écrans mobiles */
 @media (max-width: 480px) {
-
-    /* Réduction des marges/paddings pour le container */
     .container {
         padding: var(--sp-2);
     }
 
-    /* Ajustement de l'en-tête */
     .header {
         padding: var(--sp-2);
         font-size: 0.9rem;
@@ -2790,7 +2321,6 @@ body {
         min-width: 100%;
     }
 
-    /* Adaptation de la grille des liens en une seule colonne */
     .links-grid {
         grid-template-columns: 1fr;
         gap: var(--sp-2);
@@ -2798,11 +2328,8 @@ body {
 
     .link-card {
         padding: var(--sp-3);
-        /* Assurez-vous que le contenu ne déborde pas */
-        overflow: hidden;
     }
 
-    /* Sidebar adaptée pour occuper toute la largeur si nécessaire */
     .sidebar {
         width: 100%;
         position: fixed;
@@ -2813,18 +2340,12 @@ body {
         z-index: 1000;
     }
 
-    /* Masquer ou simplifier la sidebar en mobile si besoin */
     .sidebar-collapse-btn {
         display: flex;
-        /* Au lieu de none */
-        left: auto;
-        /* Reset la position left */
         right: var(--sp-4);
-        /* Positionner à droite */
+        left: auto;
         bottom: var(--sp-4);
-        /* Garder en bas */
         z-index: 1002;
-        /* Au-dessus de la sidebar */
     }
 
     .main-container {
@@ -2832,14 +2353,12 @@ body {
         padding: var(--sp-2);
     }
 
-    /* Bouton de menu mobile repositionné */
     .mobile-menu-btn {
         top: 10px;
         left: 10px;
         padding: var(--sp-1);
     }
 
-    /* Ajustement du panneau des notes pour occuper la totalité de la largeur */
     .notes-panel {
         width: 100%;
         height: 100%;
@@ -2849,7 +2368,6 @@ body {
         z-index: 2100;
     }
 
-    /* Ajustement des toolbars et autres éléments pour un meilleur toucher */
     .editor-toolbar {
         padding: var(--sp-2);
         gap: var(--sp-1);
@@ -2862,7 +2380,6 @@ body {
         min-height: 40px;
     }
 
-    /* Ajustement des formulaires et zones de texte */
     .form-control,
     .note-title-input {
         font-size: 0.95rem;
