@@ -735,7 +735,7 @@ body {
 
 .empty-icon {
     font-size: 3rem;
-    margin-bottom: var(--sp-4);
+    margin-bottom: var (--sp-4);
     color: var (--text-secondary);
 }
 
@@ -2815,7 +2815,16 @@ body {
 
     /* Masquer ou simplifier la sidebar en mobile si besoin */
     .sidebar-collapse-btn {
-        display: none;
+        display: flex;
+        /* Au lieu de none */
+        left: auto;
+        /* Reset la position left */
+        right: var(--sp-4);
+        /* Positionner à droite */
+        bottom: var(--sp-4);
+        /* Garder en bas */
+        z-index: 1002;
+        /* Au-dessus de la sidebar */
     }
 
     .main-container {
