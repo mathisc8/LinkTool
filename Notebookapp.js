@@ -17,16 +17,15 @@ let selectedPageId = null;
 let editMode = null; // "note" ou "page"
 let currentUserId = null;
 
-// Ajouter aux variables globales
+// Liste des notes du Notebook sélectionné (pour éviter de recharger en permanence)
 let currentNotes = [];
 
 /****************************
- * Navigation
+ * Navigation (exemple)
  ****************************/
 function goHome() {
-    // Exemple : rediriger vers une page d'accueil
+    // Par exemple : rediriger vers une page d'accueil
     window.location.href = "accueil.html";
-    // Ou ce que tu souhaites
 }
 
 /****************************
@@ -54,7 +53,7 @@ function updateThemeIcon(theme) {
 }
 
 /****************************
- * Au chargement : init
+ * Vérification de l'authentification
  ****************************/
 async function checkAuth() {
     const { data: { user } } = await supabase.auth.getUser();
@@ -66,23 +65,31 @@ async function checkAuth() {
     return true;
 }
 
+/****************************
+ * Au chargement : initialisation
+ ****************************/
 document.addEventListener("DOMContentLoaded", async () => {
-    // Vérifier l'authentification avant toute chose
+    // 1. Vérifier l'authentification
     if (!await checkAuth()) return;
 
+    // 2. Initialiser le thème
     initTheme();
+
+    // 3. Charger la liste des Notebooks
     await loadNotebooks();
+
+    // 4. Mettre en place l'auto-sauvegarde (notes/pages)
     setupAutoSave();
 
-    // Event listener pour le toggle du thème
+    // 5. Event listener pour le toggle du thème
     document
         .getElementById("themeToggle")
         ?.addEventListener("click", toggleTheme);
 
-    // Afficher "No selection" au départ
+    // 6. Afficher "No selection" au départ
     showEmptyState(true);
 
-    // Ajouter les gestionnaires d'événements pour le formatage
+    // 7. Ajouter les gestionnaires d'événements pour le formatage
     document.querySelectorAll('.format-btn').forEach(btn => {
         const format = btn.dataset.format;
         if (format !== 'insertImage') {
@@ -90,9 +97,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     });
 
+    // 8. Gestion des images (upload + insertion + suppression)
     setupImageHandling();
 
-    // Ajouter des écouteurs pour mettre à jour l'état des boutons
+    // 9. Ajouter des écouteurs pour mettre à jour l'état des boutons de format
     const editorContent = document.getElementById('editorContent');
     if (editorContent) {
         editorContent.addEventListener('keyup', updateFormatButtonStates);
@@ -103,14 +111,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 /****************************
  * 1) GESTION DES NOTEBOOKS
  ****************************/
-
-/** Charger la liste des Notebooks depuis Supabase */
 async function loadNotebooks() {
     try {
         const { data, error } = await supabase
             .from("notebooks")
             .select("*")
-            .eq('user_id', currentUserId) // Ajouter ce filtre
+            .eq('user_id', currentUserId)
             .order("name", { ascending: true });
 
         if (error) throw error;
@@ -123,25 +129,24 @@ async function loadNotebooks() {
             notebookEl.className = "notebook-item";
 
             notebookEl.innerHTML = `
-        <div class="notebook-title ${notebook.id === selectedNotebookId ? "active" : ""
-                }" data-notebook-id="${notebook.id}">
-          <div class="notebook-title-left">
-            <i class="fas ${notebook.id === selectedNotebookId ? "fa-book-open" : "fa-book"
-                }"></i>
-            <span class="notebook-name">${notebook.name}</span>
-          </div>
-          <div class="notebook-actions">
-            <button class="action-btn edit-btn" title="Renommer">
-                <i class="fas fa-edit"></i>
-            </button>
-            <button class="action-btn delete-btn" title="Supprimer">
-                <i class="fas fa-trash"></i>
-            </button>
-          </div>
-        </div>
-      `;
+                <div class="notebook-title ${notebook.id === selectedNotebookId ? "active" : ""}" 
+                     data-notebook-id="${notebook.id}">
+                  <div class="notebook-title-left">
+                    <i class="fas ${notebook.id === selectedNotebookId ? "fa-book-open" : "fa-book"}"></i>
+                    <span class="notebook-name">${notebook.name}</span>
+                  </div>
+                  <div class="notebook-actions">
+                    <button class="action-btn edit-btn" title="Renommer">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="action-btn delete-btn" title="Supprimer">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                </div>
+            `;
 
-            // Clic sur le titre du Notebook => sélection
+            // Clic sur le titre => sélection du Notebook
             notebookEl
                 .querySelector(".notebook-title")
                 .addEventListener("click", () => {
@@ -164,9 +169,7 @@ async function loadNotebooks() {
                 .querySelector(".delete-btn")
                 .addEventListener("click", async (e) => {
                     e.stopPropagation();
-                    if (
-                        confirm(`Voulez-vous vraiment supprimer le Notebook "${notebook.name}" ?`)
-                    ) {
+                    if (confirm(`Voulez-vous vraiment supprimer le Notebook "${notebook.name}" ?`)) {
                         await deleteNotebook(notebook.id);
                     }
                 });
@@ -174,7 +177,7 @@ async function loadNotebooks() {
             listDiv.appendChild(notebookEl);
         });
 
-        // Si un notebook est sélectionné, recharger la liste de notes
+        // Si un notebook est déjà sélectionné, recharger la liste de ses notes
         if (selectedNotebookId) {
             await loadNotes(selectedNotebookId);
         }
@@ -184,7 +187,7 @@ async function loadNotebooks() {
 }
 
 function selectNotebook(notebookId) {
-    // Mise à jour des classes active
+    // Mise à jour visuelle
     document.querySelectorAll(".notebook-title").forEach((el) => {
         el.classList.remove("active");
         const icon = el.querySelector("i");
@@ -204,10 +207,15 @@ function selectNotebook(notebookId) {
     selectedNoteId = null;
     selectedPageId = null;
 
+    // Charger les notes du Notebook sélectionné
     loadNotes(notebookId);
-    loadPages(null); // Réinitialise la liste des pages
+
+    // Réinitialiser la liste des pages (plus aucune note sélectionnée)
+    loadPages(null);
+
     updateHierarchyPath();
-    showEmptyState(true); // On ré-initialise l'état vide en attendant la selection d'une note
+    // On met l'éditeur en "vide" en attendant qu'une note soit sélectionnée
+    showEmptyState(true);
 }
 
 async function createNotebook() {
@@ -218,13 +226,15 @@ async function createNotebook() {
         const newNotebook = {
             id: crypto.randomUUID(),
             name,
-            user_id: currentUserId // Ajouter l'user_id
+            user_id: currentUserId
         };
 
         const { error } = await supabase
             .from("notebooks")
             .insert([newNotebook]);
+
         if (error) throw error;
+
         await loadNotebooks();
     } catch (err) {
         console.error("Erreur createNotebook:", err.message);
@@ -237,6 +247,7 @@ async function renameNotebook(notebookId, newName) {
             .from("notebooks")
             .update({ name: newName })
             .eq("id", notebookId);
+
         if (error) throw error;
 
         await loadNotebooks();
@@ -247,16 +258,18 @@ async function renameNotebook(notebookId, newName) {
 
 async function deleteNotebook(notebookId) {
     try {
-        // Supprimer d'abord les notes/pages associées si nécessaire
-        // ou tu peux mettre des contraintes ON CASCADE dans Supabase
+        // Supprimer d'abord toutes les notes/pages associées 
+        // si pas de cascade dans la DB (ou si vous préférez un cascade en base, c'est au choix)
 
+        // Supprime le Notebook
         const { error } = await supabase
             .from("notebooks")
             .delete()
             .eq("id", notebookId);
+
         if (error) throw error;
 
-        // Si on supprime le notebook sélectionné, on reset la sélection
+        // Si c'était le notebook sélectionné
         if (notebookId === selectedNotebookId) {
             selectedNotebookId = null;
             selectedNoteId = null;
@@ -290,7 +303,8 @@ async function loadNotes(notebookId) {
 
         if (currentNotes.length === 0) {
             notesListDiv.innerHTML = `
-                <div class="empty-state" style="position:static; border-radius:var(--radius-sm); height:auto; opacity:1; pointer-events:auto;">
+                <div class="empty-state" 
+                     style="position:static; border-radius:var(--radius-sm); height:auto; opacity:1; pointer-events:auto;">
                     <i class="fas fa-file-alt"></i>
                     <p>Aucune note dans ce notebook</p>
                 </div>
@@ -305,7 +319,7 @@ async function loadNotes(notebookId) {
         currentNotes.forEach((note) => {
             const li = document.createElement("li");
             li.className = note.id === selectedNoteId ? 'active' : '';
-            li.dataset.noteId = note.id; // Ajout d'un data attribute pour l'ID
+            li.dataset.noteId = note.id;
             li.innerHTML = `
                 <div class="note-content">
                     <span class="note-title">${note.title || "(Sans titre)"}</span>
@@ -317,15 +331,14 @@ async function loadNotes(notebookId) {
                 </div>
             `;
 
-            // Gestion du clic sur toute la note
+            // Clic sur toute la zone de la note => sélection
             li.addEventListener('click', (e) => {
-                // Ne pas déclencher si on clique sur le bouton delete
                 if (!e.target.closest('.delete-btn')) {
                     selectNote(note.id);
                 }
             });
 
-            // Gestion séparée du bouton delete
+            // Clic sur le bouton "Supprimer"
             li.querySelector(".delete-btn").addEventListener('click', async (e) => {
                 e.stopPropagation();
                 if (confirm("Voulez-vous vraiment supprimer cette note ?")) {
@@ -353,8 +366,12 @@ function selectNote(noteId) {
     selectedPageId = null;
     editMode = "note";
 
+    // Afficher contenu de la note dans l'éditeur
     showInEditor(note.title, note.content);
+
+    // Charger les pages associées
     loadPages(noteId);
+
     updateHierarchyPath();
     showEmptyState(false);
 }
@@ -366,7 +383,7 @@ async function createNote() {
     }
 
     const title = prompt("Titre de la Note :");
-    if (title === null) return; // Annulé
+    if (title === null) return;
 
     const now = new Date().toISOString();
     const newNote = {
@@ -376,7 +393,7 @@ async function createNote() {
         content: "",
         date_created: now,
         last_modified: now,
-        user_id: currentUserId // Ajouter l'user_id
+        user_id: currentUserId
     };
 
     try {
@@ -412,20 +429,18 @@ async function deleteNote(noteId) {
 /****************************
  * 3) GESTION DES PAGES
  ****************************/
-// Modifier la fonction loadPages pour améliorer la gestion des clics et l'état actif
 async function loadPages(noteId) {
     try {
+        const pagesListDiv = document.getElementById("pagesList");
         if (!noteId) {
             // Si pas de note sélectionnée, on vide la liste des pages
-            const pagesListDiv = document.getElementById("pagesList");
-            if (pagesListDiv) {
-                pagesListDiv.innerHTML = `
-                    <div class="empty-state" style="position:static; border-radius:var(--radius-sm); height:auto; opacity:1; pointer-events:auto;">
-                        <i class="fas fa-file-alt"></i>
-                        <p>Sélectionnez une note pour voir ses pages</p>
-                    </div>
-                `;
-            }
+            pagesListDiv.innerHTML = `
+                <div class="empty-state" 
+                     style="position:static; border-radius:var(--radius-sm); height:auto; opacity:1; pointer-events:auto;">
+                    <i class="fas fa-file-alt"></i>
+                    <p>Sélectionnez une note pour voir ses pages</p>
+                </div>
+            `;
             return;
         }
 
@@ -438,13 +453,12 @@ async function loadPages(noteId) {
 
         if (error) throw error;
 
-        const pagesListDiv = document.getElementById("pagesList");
         pagesListDiv.innerHTML = "";
 
-        // Ajouter un message si pas de pages
         if (!data || data.length === 0) {
             pagesListDiv.innerHTML = `
-                <div class="empty-state" style="position:static; border-radius:var(--radius-sm); height:auto; opacity:1; pointer-events:auto;">
+                <div class="empty-state" 
+                     style="position:static; border-radius:var(--radius-sm); height:auto; opacity:1; pointer-events:auto;">
                     <i class="fas fa-file-alt"></i>
                     <p>Aucune page dans cette note</p>
                 </div>
@@ -470,15 +484,14 @@ async function loadPages(noteId) {
                 </div>
             `;
 
-            // Gestion du clic sur toute la page
+            // Clic sur la zone de la page => sélectionner la page
             li.addEventListener('click', (e) => {
-                // Ne pas déclencher si on clique sur le bouton delete
                 if (!e.target.closest('.delete-btn')) {
                     selectPage(page);
                 }
             });
 
-            // Gestion séparée du bouton delete
+            // Clic sur bouton "Supprimer"
             li.querySelector(".delete-btn").addEventListener('click', async (e) => {
                 e.stopPropagation();
                 if (confirm("Voulez-vous vraiment supprimer cette page ?")) {
@@ -495,7 +508,6 @@ async function loadPages(noteId) {
     }
 }
 
-// Modifier la fonction selectPage pour mettre à jour la sélection visuelle
 function selectPage(page) {
     selectedPageId = page.id;
     editMode = "page";
@@ -506,7 +518,7 @@ function selectPage(page) {
     });
 
     // Afficher le contenu complet de la page dans l'éditeur
-    showInEditor(page.title, page.content || ''); // Ajout du fallback pour content
+    showInEditor(page.title, page.content || '');
     updateHierarchyPath();
     showEmptyState(false);
 }
@@ -525,10 +537,10 @@ async function createPage() {
         id: crypto.randomUUID(),
         note_id: selectedNoteId,
         title,
-        content: "", // S'assurer que content est initialisé
+        content: "",
         date_created: now,
         last_modified: now,
-        user_id: currentUserId // Ajouter l'user_id
+        user_id: currentUserId
     };
 
     try {
@@ -540,7 +552,9 @@ async function createPage() {
 
         if (error) throw error;
 
+        // Recharger les pages
         await loadPages(selectedNoteId);
+
         // Sélectionner automatiquement la nouvelle page
         if (data) {
             selectPage(data);
@@ -572,7 +586,7 @@ async function deletePage(pageId) {
 }
 
 /****************************
- * 4) EDITEUR (Note ou Page)
+ * 4) ÉDITEUR (Note ou Page)
  ****************************/
 function showInEditor(title, content) {
     const editorTitle = document.getElementById("editorTitle");
@@ -580,15 +594,31 @@ function showInEditor(title, content) {
 
     if (editorTitle && editorContent) {
         editorTitle.textContent = title || "";
-        // Utiliser innerHTML au lieu de textContent pour interpréter le HTML
-        editorContent.innerHTML = content || "";
+
+        // Nettoyage éventuel du contenu HTML
+        if (content) {
+            const sanitizedContent = DOMPurify.sanitize(content, {
+                ALLOWED_TAGS: [
+                    'div', 'br', 'p', 'strong', 'em', 'u',
+                    'h1', 'h2', 'h3', 'ul', 'ol', 'li', 'img', 'span'
+                ],
+                ALLOWED_ATTR: ['src', 'alt', 'style', 'class', 'data-*']
+            });
+            editorContent.innerHTML = sanitizedContent;
+
+            // Réattacher les listeners sur les images existantes
+            editorContent.querySelectorAll('.image-wrapper').forEach(wrapper => {
+                attachImageListeners(wrapper);
+            });
+        } else {
+            editorContent.innerHTML = '';
+        }
 
         editorTitle.contentEditable = "true";
         editorContent.contentEditable = "true";
     }
 }
 
-// Modifier la fonction saveCurrent pour sauvegarder le HTML
 async function saveCurrent() {
     const editorTitle = document.getElementById("editorTitle");
     const editorContent = document.getElementById("editorContent");
@@ -596,7 +626,6 @@ async function saveCurrent() {
     if (!editorTitle || !editorContent) return;
 
     const newTitle = editorTitle.textContent.trim();
-    // Utiliser innerHTML pour sauvegarder le contenu formaté
     const newContent = editorContent.innerHTML.trim();
     const now = new Date().toISOString();
 
@@ -613,6 +642,7 @@ async function saveCurrent() {
                 .eq("user_id", currentUserId);
 
             if (error) throw error;
+
             await loadNotes(selectedNotebookId);
 
         } else if (editMode === "page" && selectedPageId) {
@@ -627,6 +657,7 @@ async function saveCurrent() {
                 .eq("user_id", currentUserId);
 
             if (error) throw error;
+
             await loadPages(selectedNoteId);
         }
     } catch (err) {
@@ -639,20 +670,24 @@ function clearEditor() {
     editMode = null;
     selectedNoteId = null;
     selectedPageId = null;
+
     const editorTitle = document.getElementById("editorTitle");
     const editorContent = document.getElementById("editorContent");
 
-    editorTitle.textContent = "";
-    editorContent.textContent = "";
+    if (editorTitle) editorTitle.textContent = "";
+    if (editorContent) editorContent.textContent = "";
+
     updateHierarchyPath();
     showEmptyState(true);
 }
 
 /****************************
- * 5) AFFICHAGE DU CHEMIN
+ * 5) AFFICHAGE DU CHEMIN (HierarchyPath)
  ****************************/
 async function updateHierarchyPath() {
     const pathDiv = document.getElementById("hierarchyPath");
+    if (!pathDiv) return;
+
     pathDiv.innerHTML = "";
 
     const createPathElement = (text, type) => {
@@ -663,33 +698,43 @@ async function updateHierarchyPath() {
     };
 
     try {
+        // Notebook
         if (selectedNotebookId) {
             const { data: notebook } = await supabase
                 .from("notebooks")
                 .select("name")
                 .eq("id", selectedNotebookId)
                 .single();
+
             pathDiv.appendChild(
                 createPathElement(notebook?.name || "Notebook", "notebook")
             );
         }
 
+        // Note
         if (selectedNoteId) {
             const { data: note } = await supabase
                 .from("notes")
                 .select("title")
                 .eq("id", selectedNoteId)
                 .single();
-            pathDiv.appendChild(createPathElement(note?.title || "Note", "note"));
+
+            pathDiv.appendChild(
+                createPathElement(note?.title || "Note", "note")
+            );
         }
 
+        // Page
         if (selectedPageId) {
             const { data: page } = await supabase
                 .from("pages")
                 .select("title")
                 .eq("id", selectedPageId)
                 .single();
-            pathDiv.appendChild(createPathElement(page?.title || "Page", "page"));
+
+            pathDiv.appendChild(
+                createPathElement(page?.title || "Page", "page")
+            );
         }
     } catch (error) {
         console.error("Erreur lors de la mise à jour du chemin:", error);
@@ -697,9 +742,8 @@ async function updateHierarchyPath() {
 }
 
 /****************************
- * 6) Auto-sauvegarde
+ * 6) AUTO-SAUVEGARDE
  ****************************/
-// Petite fonction debounce
 function debounce(func, delay) {
     let timeout;
     return function (...args) {
@@ -715,18 +759,17 @@ function setupAutoSave() {
     const editorContent = document.getElementById("editorContent");
 
     const autoSave = debounce(async () => {
-        // On ne sauvegarde que si on édite une note ou page existante
         if (editMode && (selectedNoteId || selectedPageId)) {
             await saveCurrent();
         }
     }, 1000);
 
-    editorTitle.addEventListener("input", autoSave);
-    editorContent.addEventListener("input", autoSave);
+    if (editorTitle) editorTitle.addEventListener("input", autoSave);
+    if (editorContent) editorContent.addEventListener("input", autoSave);
 }
 
 /****************************
- * 7) Gérer l'état vide (empty state)
+ * 7) ÉTAT VIDE (empty state)
  ****************************/
 function showEmptyState(show) {
     const emptyStateDiv = document.getElementById("emptyState");
@@ -735,13 +778,11 @@ function showEmptyState(show) {
     if (!emptyStateDiv || !editorPanel) return;
 
     if (show) {
-        // Affiche l'état vide, masque l'éditeur
         emptyStateDiv.style.opacity = 1;
         emptyStateDiv.style.pointerEvents = "auto";
         editorPanel.style.opacity = 0.3;
         editorPanel.style.pointerEvents = "none";
     } else {
-        // Masque l'état vide
         emptyStateDiv.style.opacity = 0;
         emptyStateDiv.style.pointerEvents = "none";
         editorPanel.style.opacity = 1;
@@ -749,7 +790,9 @@ function showEmptyState(show) {
     }
 }
 
-// Ajouter ces fonctions pour la gestion du formatage
+/****************************
+ * 8) FORMATAGE DU TEXTE
+ ****************************/
 function applyFormat(command, value = null) {
     document.execCommand(command, false, value);
     updateFormatButtonStates();
@@ -764,21 +807,28 @@ function updateFormatButtonStates() {
     });
 }
 
-// Gestion des images
+/****************************
+ * 9) GESTION DES IMAGES
+ ****************************/
 async function uploadImage(file) {
     try {
+        // Nom de fichier unique
         const fileExt = file.name.split('.').pop();
-        const fileName = `${crypto.randomUUID()}.${fileExt}`;
-        const filePath = `${currentUserId}/notes/${fileName}`;
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `${currentUserId}/${fileName}`;
 
-        // Upload vers Supabase Storage
+        // Upload vers le bucket "notes-images"
         const { data, error } = await supabase.storage
             .from('notes-images')
-            .upload(filePath, file);
+            .upload(filePath, file, {
+                cacheControl: '3600',
+                upsert: false,
+                contentType: file.type
+            });
 
         if (error) throw error;
 
-        // Obtenir l'URL publique
+        // Récupérer l'URL publique
         const { data: { publicUrl } } = supabase.storage
             .from('notes-images')
             .getPublicUrl(filePath);
@@ -790,71 +840,145 @@ async function uploadImage(file) {
     }
 }
 
-// Modifier la fonction setupImageHandling pour utiliser le stockage
 function setupImageHandling() {
     const imageBtn = document.querySelector('[data-format="insertImage"]');
     const imageInput = document.getElementById('imageInput');
 
+    if (!imageBtn || !imageInput) return;
+
+    // Clic sur le bouton d'insertion d'image
     imageBtn.addEventListener('click', () => {
         imageInput.click();
     });
 
+    // Changement dans l'input file
     imageInput.addEventListener('change', async (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
+        // Vérification du format
+        if (!['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(file.type)) {
+            alert('Format d\'image non supporté. Utilisez JPG, PNG, GIF ou WebP.');
+            return;
+        }
+
+        // Vérification de la taille (5MB max)
+        if (file.size > 5 * 1024 * 1024) {
+            alert('L\'image ne doit pas dépasser 5MB.');
+            return;
+        }
+
+        // Indicateur de chargement
+        const loadingIndicator = document.createElement('div');
+        loadingIndicator.className = 'loading-indicator';
+        loadingIndicator.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Upload en cours...';
+        document.body.appendChild(loadingIndicator);
+
         try {
-            // Afficher un indicateur de chargement si nécessaire
+            // Upload
             const publicUrl = await uploadImage(file);
-            insertImage(publicUrl);
-            await saveCurrent();
+
+            // Insertion dans l'éditeur
+            if (publicUrl) {
+                insertImage(publicUrl);
+                await saveCurrent();
+                showToast('Image uploadée avec succès', 'success');
+            }
         } catch (error) {
             console.error('Erreur lors du chargement de l\'image:', error);
-            alert('Erreur lors du chargement de l\'image');
+            showToast('Erreur lors de l\'upload de l\'image', 'error');
+        } finally {
+            // Retirer l'indicateur
+            loadingIndicator.remove();
+            imageInput.value = '';
         }
     });
 }
 
 function insertImage(src) {
     const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+
     const range = selection.getRangeAt(0);
 
     const wrapper = document.createElement('div');
     wrapper.className = 'image-wrapper';
-    wrapper.contentEditable = 'false'; // Empêcher l'édition du wrapper
+    wrapper.contentEditable = 'false';
 
     const img = document.createElement('img');
     img.src = src;
     img.alt = 'Image insérée';
     img.style.maxWidth = '100%';
 
-    const actions = document.createElement('div');
-    actions.className = 'image-actions';
-    actions.innerHTML = `
-        <button class="image-action-btn delete-img" title="Supprimer l'image">
-            <i class="fas fa-trash"></i>
-        </button>
+    wrapper.appendChild(img);
+
+    // Actions sur l'image
+    wrapper.innerHTML += `
+        <div class="image-actions">
+            <button class="image-action-btn delete-img" title="Supprimer l'image">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
     `;
 
-    wrapper.appendChild(img);
-    wrapper.appendChild(actions);
+    attachImageListeners(wrapper);
 
-    // Ajouter le gestionnaire d'événements pour la suppression
-    wrapper.querySelector('.delete-img').addEventListener('click', async () => {
-        // Extraire le nom du fichier de l'URL
-        const fileName = src.split('/').pop();
-        try {
-            // Supprimer l'image du stockage
-            await supabase.storage
-                .from('notes-images')
-                .remove([`${currentUserId}/notes/${fileName}`]);
-            wrapper.remove();
-            await saveCurrent();
-        } catch (error) {
-            console.error('Erreur lors de la suppression:', error);
-        }
-    });
-
+    // Insérer le wrapper dans l'éditeur à l'emplacement du curseur
     range.insertNode(wrapper);
     range.collapse(false);
+
+    // Sauvegarde automatique après insertion
+    saveCurrent();
+}
+
+function attachImageListeners(wrapper) {
+    const deleteBtn = wrapper.querySelector('.delete-img');
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', async () => {
+            const img = wrapper.querySelector('img');
+            if (img && img.src) {
+                try {
+                    // Récupérer le nom de fichier à partir de l'URL
+                    const fileUrl = new URL(img.src);
+                    const fileName = fileUrl.pathname.split('/').pop();
+                    if (fileName) {
+                        // Supprimer du stockage
+                        await supabase.storage
+                            .from('notes-images')
+                            .remove([`${currentUserId}/${fileName}`]);
+                    }
+                    // Retirer du DOM
+                    wrapper.remove();
+                    saveCurrent();
+                } catch (error) {
+                    console.error('Erreur lors de la suppression:', error);
+                    showToast('Erreur lors de la suppression de l\'image', 'error');
+                }
+            }
+        });
+    }
+
+    // Permettre un redimensionnement simple (ex : Ctrl + clic)
+    const img = wrapper.querySelector('img');
+    if (img) {
+        img.style.cursor = 'pointer';
+        img.addEventListener('click', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                const newSize = prompt('Entrez la largeur en % (10-100)', '100');
+                if (newSize && !isNaN(newSize) && newSize >= 10 && newSize <= 100) {
+                    img.style.width = `${newSize}%`;
+                    saveCurrent();
+                }
+            }
+        });
+    }
+}
+
+/****************************
+ * 10) GESTION DES TOASTS (exemple)
+ ****************************/
+function showToast(message, type = "info") {
+    // Implémentez ici votre système de notification/toast
+    // Par exemple : un petit DIV qui apparaît en haut à droite
+    console.log(`[${type.toUpperCase()}] ${message}`);
 }
