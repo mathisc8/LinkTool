@@ -488,7 +488,8 @@ function selectPage(page) {
         li.classList.toggle('active', li.dataset.pageId === page.id);
     });
 
-    showInEditor(page.title, page.content);
+    // Afficher le contenu complet de la page dans l'éditeur
+    showInEditor(page.title, page.content || ''); // Ajout du fallback pour content
     updateHierarchyPath();
     showEmptyState(false);
 }
@@ -507,19 +508,29 @@ async function createPage() {
         id: crypto.randomUUID(),
         note_id: selectedNoteId,
         title,
-        content: "",
+        content: "", // S'assurer que content est initialisé
         date_created: now,
         last_modified: now,
         user_id: currentUserId // Ajouter l'user_id
     };
 
     try {
-        const { error } = await supabase.from("pages").insert([newPage]);
+        const { data, error } = await supabase
+            .from("pages")
+            .insert([newPage])
+            .select()
+            .single();
+
         if (error) throw error;
 
         await loadPages(selectedNoteId);
+        // Sélectionner automatiquement la nouvelle page
+        if (data) {
+            selectPage(data);
+        }
     } catch (err) {
         console.error("Erreur createPage:", err.message);
+        showToast("Erreur lors de la création de la page", "error");
     }
 }
 
@@ -564,8 +575,10 @@ async function saveCurrent() {
     const editorTitle = document.getElementById("editorTitle");
     const editorContent = document.getElementById("editorContent");
 
+    if (!editorTitle || !editorContent) return;
+
     const newTitle = editorTitle.textContent.trim();
-    const newContent = editorContent.textContent;
+    const newContent = editorContent.textContent.trim();
     const now = new Date().toISOString();
 
     try {
@@ -577,9 +590,10 @@ async function saveCurrent() {
                     content: newContent,
                     last_modified: now,
                 })
-                .eq("id", selectedNoteId);
+                .eq("id", selectedNoteId)
+                .eq("user_id", currentUserId);
+
             if (error) throw error;
-            // On ne fait pas forcément d'alert("..."), ça peut être agaçant
             await loadNotes(selectedNotebookId);
 
         } else if (editMode === "page" && selectedPageId) {
@@ -590,14 +604,15 @@ async function saveCurrent() {
                     content: newContent,
                     last_modified: now,
                 })
-                .eq("id", selectedPageId);
+                .eq("id", selectedPageId)
+                .eq("user_id", currentUserId);
+
             if (error) throw error;
             await loadPages(selectedNoteId);
-        } else {
-            // Pas de note/page sélectionnée
         }
     } catch (err) {
         console.error("Erreur saveCurrent:", err.message);
+        showToast("Erreur lors de la sauvegarde", "error");
     }
 }
 
