@@ -583,22 +583,20 @@ async function deletePage(pageId) {
 function showInEditor(title, content) {
     const editorTitle = document.getElementById("editorTitle");
     const editorContent = document.getElementById("editorContent");
+    const editorPanel = document.getElementById("editorPanel");
 
     if (editorTitle && editorContent) {
         editorTitle.textContent = title || "";
 
-        // Nettoyage éventuel du contenu HTML (DOMPurify si besoin)
         if (content) {
+            // Nettoyer le contenu HTML
             const sanitizedContent = DOMPurify.sanitize(content, {
-                ALLOWED_TAGS: [
-                    'div', 'br', 'p', 'strong', 'em', 'u',
-                    'h1', 'h2', 'h3', 'ul', 'ol', 'li', 'img', 'span'
-                ],
+                ALLOWED_TAGS: ['div', 'br', 'p', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'ul', 'ol', 'li', 'img', 'span'],
                 ALLOWED_ATTR: ['src', 'alt', 'style', 'class', 'data-*']
             });
             editorContent.innerHTML = sanitizedContent;
 
-            // Réattacher les listeners sur les images existantes
+            // Réattacher les listeners aux images
             editorContent.querySelectorAll('.image-wrapper').forEach(wrapper => {
                 attachImageListeners(wrapper);
             });
@@ -606,9 +604,45 @@ function showInEditor(title, content) {
             editorContent.innerHTML = '';
         }
 
+        // Ajouter les gestionnaires de scroll
+        if (editorPanel) {
+            setupInfiniteScroll(editorPanel, editorContent);
+        }
+
         editorTitle.contentEditable = "true";
         editorContent.contentEditable = "true";
     }
+}
+
+function setupInfiniteScroll(panel, content) {
+    let isScrolling = false;
+    const scrollThreshold = 100; // pixels avant la fin du scroll
+
+    panel.addEventListener('scroll', () => {
+        if (isScrolling) return;
+
+        const scrollPosition = panel.scrollTop + panel.offsetHeight;
+        const scrollHeight = panel.scrollHeight;
+
+        if (scrollHeight - scrollPosition < scrollThreshold) {
+            isScrolling = true;
+
+            // Ajouter de l'espace au contenu
+            content.style.paddingBottom = `${parseInt(getComputedStyle(content).paddingBottom) + 50}vh`;
+
+            // Réinitialiser le flag après un délai
+            setTimeout(() => {
+                isScrolling = false;
+            }, 100);
+        }
+    });
+
+    // Réinitialiser le padding quand on atteint le haut
+    panel.addEventListener('scroll', () => {
+        if (panel.scrollTop === 0) {
+            content.style.paddingBottom = '50vh';
+        }
+    });
 }
 
 async function saveCurrent() {

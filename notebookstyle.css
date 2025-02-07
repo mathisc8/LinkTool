@@ -407,6 +407,8 @@ body {
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     background: var(--surface);
+    height: calc(100vh - 180px);
+    /* Hauteur ajustée */
 }
 
 .editor-panel {
@@ -415,6 +417,9 @@ body {
     flex: 1;
     padding: 1rem;
     transition: background var(--transition-normal), color var(--transition-normal);
+    overflow-y: auto;
+    scroll-behavior: smooth;
+    position: relative;
 }
 
 .editor-title {
@@ -431,9 +436,9 @@ body {
     line-height: 1.6;
     outline: none;
     border: none;
-    resize: none;
-    overflow-y: auto;
-    min-height: 200px;
+    padding-bottom: 50vh;
+    /* Espace supplémentaire en bas pour le scroll infini */
+    min-height: 100%;
 }
 
 /* Placeholder pour contenteditable */
@@ -550,6 +555,24 @@ body {
 
 .resize-handle:hover {
     background: rgba(0, 0, 0, 0.2);
+}
+
+/* Personnalisation de la scrollbar */
+.editor-panel::-webkit-scrollbar {
+    width: 8px;
+}
+
+.editor-panel::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.editor-panel::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+}
+
+.editor-panel::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
 }
 
 /****************************************************
