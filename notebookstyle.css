@@ -439,6 +439,85 @@ body {
     display: block;
 }
 
+/* Barre d'outils de formatage */
+.editor-toolbar {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+}
+
+.format-group {
+    display: flex;
+    gap: 0.25rem;
+    padding: 0 0.5rem;
+    border-right: 1px solid var(--border);
+}
+
+.format-group:last-child {
+    border-right: none;
+}
+
+.format-btn {
+    padding: 0.5rem;
+    background: none;
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.format-btn:hover {
+    background: var(--surface-hover);
+}
+
+.format-btn.active {
+    background: var(--primary);
+    color: white;
+}
+
+/* Style des images dans l'éditeur */
+.editor-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-sm);
+    margin: 1rem 0;
+}
+
+.image-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.image-wrapper .image-actions {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    display: none;
+    gap: 0.25rem;
+}
+
+.image-wrapper:hover .image-actions {
+    display: flex;
+}
+
+.image-action-btn {
+    padding: 0.25rem;
+    background: var(--surface);
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.image-action-btn:hover {
+    background: var(--primary);
+    color: white;
+}
+
 /****************************************************
     Empty state
   *****************************************************/

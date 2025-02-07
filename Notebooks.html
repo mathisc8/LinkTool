@@ -80,6 +80,47 @@
 
                 <!-- Colonne Editeur -->
                 <div class="editor-container">
+                    <div class="editor-toolbar">
+                        <div class="format-group">
+                            <button class="format-btn" data-format="bold" title="Gras">
+                                <i class="fas fa-bold"></i>
+                            </button>
+                            <button class="format-btn" data-format="italic" title="Italique">
+                                <i class="fas fa-italic"></i>
+                            </button>
+                            <button class="format-btn" data-format="underline" title="Souligné">
+                                <i class="fas fa-underline"></i>
+                            </button>
+                        </div>
+
+                        <div class="format-group">
+                            <button class="format-btn" data-format="h1" title="Titre 1">
+                                <i class="fas fa-heading"></i>1
+                            </button>
+                            <button class="format-btn" data-format="h2" title="Titre 2">
+                                <i class="fas fa-heading"></i>2
+                            </button>
+                            <button class="format-btn" data-format="h3" title="Titre 3">
+                                <i class="fas fa-heading"></i>3
+                            </button>
+                        </div>
+
+                        <div class="format-group">
+                            <button class="format-btn" data-format="insertUnorderedList" title="Liste à puces">
+                                <i class="fas fa-list-ul"></i>
+                            </button>
+                            <button class="format-btn" data-format="insertOrderedList" title="Liste numérotée">
+                                <i class="fas fa-list-ol"></i>
+                            </button>
+                        </div>
+
+                        <div class="format-group">
+                            <button class="format-btn" data-format="insertImage" title="Insérer une image">
+                                <i class="fas fa-image"></i>
+                            </button>
+                            <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                        </div>
+                    </div>
                     <div class="editor-panel" id="editorPanel">
                         <div id="editorTitle" contenteditable="true" data-placeholder="Entrez un titre..."
                             class="editor-title"></div>

@@ -81,6 +81,23 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Afficher "No selection" au départ
     showEmptyState(true);
+
+    // Ajouter les gestionnaires d'événements pour le formatage
+    document.querySelectorAll('.format-btn').forEach(btn => {
+        const format = btn.dataset.format;
+        if (format !== 'insertImage') {
+            btn.addEventListener('click', () => applyFormat(format));
+        }
+    });
+
+    setupImageHandling();
+
+    // Ajouter des écouteurs pour mettre à jour l'état des boutons
+    const editorContent = document.getElementById('editorContent');
+    if (editorContent) {
+        editorContent.addEventListener('keyup', updateFormatButtonStates);
+        editorContent.addEventListener('mouseup', updateFormatButtonStates);
+    }
 });
 
 /****************************
@@ -727,5 +744,80 @@ function showEmptyState(show) {
         emptyStateDiv.style.pointerEvents = "none";
         editorPanel.style.opacity = 1;
         editorPanel.style.pointerEvents = "auto";
+    }
+}
+
+// Ajouter ces fonctions pour la gestion du formatage
+function applyFormat(command, value = null) {
+    document.execCommand(command, false, value);
+    updateFormatButtonStates();
+}
+
+function updateFormatButtonStates() {
+    document.querySelectorAll('.format-btn').forEach(btn => {
+        const format = btn.dataset.format;
+        if (['bold', 'italic', 'underline'].includes(format)) {
+            btn.classList.toggle('active', document.queryCommandState(format));
+        }
+    });
+}
+
+// Gestion des images
+function setupImageHandling() {
+    const imageBtn = document.querySelector('[data-format="insertImage"]');
+    const imageInput = document.getElementById('imageInput');
+
+    imageBtn.addEventListener('click', () => {
+        imageInput.click();
+    });
+
+    imageInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        try {
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const base64Image = e.target.result;
+                insertImage(base64Image);
+
+                // Sauvegarder la note/page avec la nouvelle image
+                await saveCurrent();
+            };
+            reader.readAsDataURL(file);
+        } catch (error) {
+            console.error('Erreur lors du chargement de l\'image:', error);
+            showToast('Erreur lors du chargement de l\'image', 'error');
+        }
+    });
+}
+
+function insertImage(src) {
+    const img = document.createElement('img');
+    img.src = src;
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'image-wrapper';
+    wrapper.appendChild(img);
+
+    const actions = document.createElement('div');
+    actions.className = 'image-actions';
+    actions.innerHTML = `
+        <button class="image-action-btn" onclick="removeImage(this)">
+            <i class="fas fa-trash"></i>
+        </button>
+    `;
+    wrapper.appendChild(actions);
+
+    const selection = window.getSelection();
+    const range = selection.getRangeAt(0);
+    range.insertNode(wrapper);
+}
+
+function removeImage(btn) {
+    const wrapper = btn.closest('.image-wrapper');
+    if (wrapper) {
+        wrapper.remove();
+        saveCurrent();
     }
 }
