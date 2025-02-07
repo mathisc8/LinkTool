@@ -55,20 +55,48 @@
     <!-- Barre de navigation principale -->
     <header class="header">
         <div class="header__left">
-            <h1>Mes Notes</h1>
+            <div class="brand">
+                <div class="logo-animation">
+                    <i class="fas fa-book-open-reader"></i>
+                </div>
+                <h1>Notes Pro</h1>
+            </div>
+            <div class="header-actions">
+                <a href="index.html" class="btn btn-secondary" title="Retour au Dashboard">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <button class="action-btn" title="Nouveau notebook">
+                    <i class="fas fa-plus"></i>
+                </button>
+                <button class="action-btn" title="Importer">
+                    <i class="fas fa-file-import"></i>
+                </button>
+                <button class="action-btn" title="Exporter">
+                    <i class="fas fa-file-export"></i>
+                </button>
+            </div>
+        </div>
+        <div class="header__center">
+            <div class="header-search">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Rechercher dans les notes...">
+            </div>
         </div>
         <div class="header__right">
             <button class="theme-toggle" id="themeToggle" title="Changer le thème">
                 <i class="fas fa-sun"></i>
             </button>
-            <button class="btn" onclick="window.location.href='index.html'">
-                <i class="fas fa-link"></i>
-                Liens
+            <button class="action-btn" title="Mode présentation">
+                <i class="fas fa-presentation"></i>
             </button>
-            <button class="btn" onclick="goHome()">
-                <i class="fas fa-home"></i>
-                Accueil
-            </button>
+            <div class="user-menu">
+                <button class="user-btn">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Mon Compte</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+            </div>
         </div>
     </header>
 
@@ -124,43 +152,54 @@
                 <div class="editor-container">
                     <div class="editor-toolbar">
                         <div class="format-group">
-                            <button class="format-btn" data-format="bold" title="Gras">
+                            <button class="format-btn" data-format="bold" data-tooltip="Gras (Ctrl+B)">
                                 <i class="fas fa-bold"></i>
                             </button>
-                            <button class="format-btn" data-format="italic" title="Italique">
+                            <button class="format-btn" data-format="italic" data-tooltip="Italique (Ctrl+I)">
                                 <i class="fas fa-italic"></i>
                             </button>
-                            <button class="format-btn" data-format="underline" title="Souligné">
+                            <button class="format-btn" data-format="underline" data-tooltip="Souligné (Ctrl+U)">
                                 <i class="fas fa-underline"></i>
                             </button>
-                        </div>
-
-                        <div class="format-group">
-                            <button class="format-btn" data-format="h1" title="Titre 1">
-                                <i class="fas fa-heading"></i>1
-                            </button>
-                            <button class="format-btn" data-format="h2" title="Titre 2">
-                                <i class="fas fa-heading"></i>2
-                            </button>
-                            <button class="format-btn" data-format="h3" title="Titre 3">
-                                <i class="fas fa-heading"></i>3
+                            <button class="format-btn" data-format="strikethrough" data-tooltip="Barré">
+                                <i class="fas fa-strikethrough"></i>
                             </button>
                         </div>
 
                         <div class="format-group">
-                            <button class="format-btn" data-format="insertUnorderedList" title="Liste à puces">
+                            <button class="format-btn tooltip" data-format="h1" title="Titre 1">
+                                <i class="fas fa-heading"></i><sup>1</sup>
+                            </button>
+                            <button class="format-btn tooltip" data-format="h2" title="Titre 2">
+                                <i class="fas fa-heading"></i><sup>2</sup>
+                            </button>
+                            <button class="format-btn tooltip" data-format="h3" title="Titre 3">
+                                <i class="fas fa-heading"></i><sup>3</sup>
+                            </button>
+                        </div>
+
+                        <div class="format-group">
+                            <button class="format-btn tooltip" data-format="insertUnorderedList" title="Liste à puces">
                                 <i class="fas fa-list-ul"></i>
                             </button>
-                            <button class="format-btn" data-format="insertOrderedList" title="Liste numérotée">
+                            <button class="format-btn tooltip" data-format="insertOrderedList" title="Liste numérotée">
                                 <i class="fas fa-list-ol"></i>
+                            </button>
+                            <button class="format-btn tooltip" data-format="insertCheckList" title="Liste de tâches">
+                                <i class="fas fa-tasks"></i>
                             </button>
                         </div>
 
                         <div class="format-group">
-                            <button class="format-btn" data-format="insertImage" title="Insérer une image">
+                            <button class="format-btn tooltip" data-format="insertImage" title="Insérer une image">
                                 <i class="fas fa-image"></i>
                             </button>
-                            <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                            <button class="format-btn tooltip" data-format="insertTable" title="Insérer un tableau">
+                                <i class="fas fa-table"></i>
+                            </button>
+                            <button class="format-btn tooltip" data-format="insertCode" title="Bloc de code">
+                                <i class="fas fa-code"></i>
+                            </button>
                         </div>
                     </div>
                     <div class="editor-panel" id="editorPanel">

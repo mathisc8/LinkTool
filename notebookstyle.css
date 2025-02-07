@@ -76,35 +76,106 @@ body {
 }
 
 /****************************************************
-    Header
+    Header amélioré
 *****************************************************/
 .header {
     background: var(--surface);
     border-bottom: 1px solid var(--border);
-    color: var(--text-primary);
-    padding: 0.75rem 1rem;
-    display: flex;
-    justify-content: space-between;
+    padding: 0.75rem 2rem;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 2rem;
     align-items: center;
     position: sticky;
     top: 0;
-    z-index: 10;
-    transition: background var(--transition-normal), color var(--transition-normal);
+    z-index: 100;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
 }
 
-.header h1 {
-    font-size: 1.4rem;
-    margin: 0;
+.header__left {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
 }
 
-.header__left,
+.header__center {
+    display: flex;
+    justify-content: center;
+    flex: 1;
+    max-width: 600px;
+    width: 100%;
+}
+
 .header__right {
     display: flex;
     align-items: center;
+    gap: 1rem;
 }
 
-.header__right button {
-    margin-left: 0.5rem;
+.header-search {
+    width: 100%;
+    max-width: 100%;
+    background: var(--background);
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.header-search:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.header-search input {
+    width: 100%;
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+}
+
+.header-search i {
+    color: var(--text-secondary);
+}
+
+.btn-secondary {
+    background: var(--background);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+    background: var(--surface-hover);
+    transform: translateY(-1px);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* Animation pour le bouton Dashboard */
+.btn-secondary i {
+    transition: transform 0.2s ease;
+}
+
+.btn-secondary:hover i {
+    transform: translateX(-2px);
 }
 
 /****************************************************
@@ -273,14 +344,22 @@ body {
     border-radius: var(--radius-md);
     transition: background var(--transition-normal), color var(--transition-normal);
     padding: 0.5rem 0.5rem;
+    display: flex;
+    flex-direction: column;
+    height: calc(50vh - 100px);
 }
 
 .panel-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.5rem;
+    padding: 0.75rem;
     border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--surface);
+    z-index: 10;
+    backdrop-filter: blur(8px);
 }
 
 .panel-header h3 {
@@ -293,6 +372,7 @@ body {
     max-height: calc(100vh - 220px);
     /* Contrôle la hauteur des panneaux, overflow auto */
     overflow-y: auto;
+    flex: 1;
 }
 
 /* Pour affiner encore le scroll, on peut cibler #notesList et #pagesList directement */
@@ -327,6 +407,23 @@ body {
 #notesList::-webkit-scrollbar-thumb:hover,
 #pagesList::-webkit-scrollbar-thumb:hover {
     background: #999;
+}
+
+.panel-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.panel-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.panel-body::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+}
+
+.panel-body::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
 }
 
 .item-list {
@@ -451,18 +548,23 @@ body {
 
 /* Barre d'outils de formatage */
 .editor-toolbar {
-    display: flex;
-    gap: 0.5rem;
-    padding: 0.5rem;
     background: var(--surface);
     border-bottom: 1px solid var(--border);
+    padding: 0.75rem;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
 .format-group {
     display: flex;
     gap: 0.25rem;
-    padding: 0 0.5rem;
-    border-right: 1px solid var(--border);
+    padding: 0.25rem;
+    background: var(--background);
+    border-radius: 6px;
 }
 
 .format-group:last-child {
@@ -473,19 +575,51 @@ body {
     padding: 0.5rem;
     background: none;
     border: none;
-    border-radius: var(--radius-sm);
+    border-radius: 4px;
     color: var(--text-primary);
     cursor: pointer;
     transition: all 0.2s ease;
+    position: relative;
 }
 
 .format-btn:hover {
-    background: var(--surface-hover);
+    background: var(--surface);
+    transform: translateY(-1px);
 }
 
 .format-btn.active {
     background: var(--primary);
     color: white;
+}
+
+.format-btn sup {
+    font-size: 0.7em;
+    margin-left: 2px;
+}
+
+.format-btn[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0.4rem 0.6rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.format-btn[data-tooltip]:hover::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(-5px);
 }
 
 /****************************************************
@@ -683,4 +817,108 @@ body {
 
 .loading-indicator i {
     color: var(--primary);
+}
+
+/****************************************************
+    Logo animé
+*****************************************************/
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.logo-animation {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+}
+
+.logo-animation i {
+    color: white;
+    font-size: 1.5rem;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/****************************************************
+    Tooltips améliorés
+*****************************************************/
+.tooltip {
+    position: relative;
+}
+
+.tooltip::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 5px);
+    left: 50%;
+    transform: translateX(-50%) scale(0.8);
+    padding: 0.5rem 0.75rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.tooltip:hover::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) scale(1);
+}
+
+/* Format buttons tooltips */
+.format-btn[data-tooltip] {
+    position: relative;
+}
+
+.format-btn[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0.4rem 0.6rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.format-btn[data-tooltip]:hover::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(-5px);
 }
