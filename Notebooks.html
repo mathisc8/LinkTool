@@ -7,6 +7,47 @@
     <!-- Lien vers la feuille de style -->
     <link rel="stylesheet" href="notebookstyle.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        .image-wrapper {
+            position: relative;
+            display: inline-block;
+            margin: 1rem 0;
+            max-width: 100%;
+        }
+
+        .image-wrapper img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+
+        .image-wrapper .image-actions {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            display: none;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 4px;
+            padding: 4px;
+        }
+
+        .image-wrapper:hover .image-actions {
+            display: flex;
+        }
+
+        .image-action-btn {
+            color: white;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .image-action-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
 </head>
 
 <body>

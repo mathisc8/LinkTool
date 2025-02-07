@@ -580,14 +580,15 @@ function showInEditor(title, content) {
 
     if (editorTitle && editorContent) {
         editorTitle.textContent = title || "";
-        editorContent.textContent = content || "";
+        // Utiliser innerHTML au lieu de textContent pour interpréter le HTML
+        editorContent.innerHTML = content || "";
 
-        // Rendre les éléments éditables
         editorTitle.contentEditable = "true";
         editorContent.contentEditable = "true";
     }
 }
 
+// Modifier la fonction saveCurrent pour sauvegarder le HTML
 async function saveCurrent() {
     const editorTitle = document.getElementById("editorTitle");
     const editorContent = document.getElementById("editorContent");
@@ -595,7 +596,8 @@ async function saveCurrent() {
     if (!editorTitle || !editorContent) return;
 
     const newTitle = editorTitle.textContent.trim();
-    const newContent = editorContent.textContent.trim();
+    // Utiliser innerHTML pour sauvegarder le contenu formaté
+    const newContent = editorContent.innerHTML.trim();
     const now = new Date().toISOString();
 
     try {
@@ -763,6 +765,32 @@ function updateFormatButtonStates() {
 }
 
 // Gestion des images
+async function uploadImage(file) {
+    try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${crypto.randomUUID()}.${fileExt}`;
+        const filePath = `${currentUserId}/notes/${fileName}`;
+
+        // Upload vers Supabase Storage
+        const { data, error } = await supabase.storage
+            .from('notes-images')
+            .upload(filePath, file);
+
+        if (error) throw error;
+
+        // Obtenir l'URL publique
+        const { data: { publicUrl } } = supabase.storage
+            .from('notes-images')
+            .getPublicUrl(filePath);
+
+        return publicUrl;
+    } catch (error) {
+        console.error('Erreur upload image:', error);
+        throw error;
+    }
+}
+
+// Modifier la fonction setupImageHandling pour utiliser le stockage
 function setupImageHandling() {
     const imageBtn = document.querySelector('[data-format="insertImage"]');
     const imageInput = document.getElementById('imageInput');
@@ -776,48 +804,57 @@ function setupImageHandling() {
         if (!file) return;
 
         try {
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                const base64Image = e.target.result;
-                insertImage(base64Image);
-
-                // Sauvegarder la note/page avec la nouvelle image
-                await saveCurrent();
-            };
-            reader.readAsDataURL(file);
+            // Afficher un indicateur de chargement si nécessaire
+            const publicUrl = await uploadImage(file);
+            insertImage(publicUrl);
+            await saveCurrent();
         } catch (error) {
             console.error('Erreur lors du chargement de l\'image:', error);
-            showToast('Erreur lors du chargement de l\'image', 'error');
+            alert('Erreur lors du chargement de l\'image');
         }
     });
 }
 
 function insertImage(src) {
-    const img = document.createElement('img');
-    img.src = src;
+    const selection = window.getSelection();
+    const range = selection.getRangeAt(0);
 
     const wrapper = document.createElement('div');
     wrapper.className = 'image-wrapper';
-    wrapper.appendChild(img);
+    wrapper.contentEditable = 'false'; // Empêcher l'édition du wrapper
+
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = 'Image insérée';
+    img.style.maxWidth = '100%';
 
     const actions = document.createElement('div');
     actions.className = 'image-actions';
     actions.innerHTML = `
-        <button class="image-action-btn" onclick="removeImage(this)">
+        <button class="image-action-btn delete-img" title="Supprimer l'image">
             <i class="fas fa-trash"></i>
         </button>
     `;
+
+    wrapper.appendChild(img);
     wrapper.appendChild(actions);
 
-    const selection = window.getSelection();
-    const range = selection.getRangeAt(0);
-    range.insertNode(wrapper);
-}
+    // Ajouter le gestionnaire d'événements pour la suppression
+    wrapper.querySelector('.delete-img').addEventListener('click', async () => {
+        // Extraire le nom du fichier de l'URL
+        const fileName = src.split('/').pop();
+        try {
+            // Supprimer l'image du stockage
+            await supabase.storage
+                .from('notes-images')
+                .remove([`${currentUserId}/notes/${fileName}`]);
+            wrapper.remove();
+            await saveCurrent();
+        } catch (error) {
+            console.error('Erreur lors de la suppression:', error);
+        }
+    });
 
-function removeImage(btn) {
-    const wrapper = btn.closest('.image-wrapper');
-    if (wrapper) {
-        wrapper.remove();
-        saveCurrent();
-    }
+    range.insertNode(wrapper);
+    range.collapse(false);
 }
