@@ -736,7 +736,7 @@ body {
 }
 
 /* ======================================= */
-/*               SIDEBAR                 */
+/*               SIDEBAR                   */
 /* ======================================= */
 .sidebar {
     position: fixed;
@@ -1043,7 +1043,7 @@ body {
     }
 
     .mobile-menu-btn {
-        display: flex;
+        display: block;
         position: fixed;
         top: var(--sp-4);
         left: var(--sp-4);
@@ -1346,7 +1346,7 @@ body {
 }
 
 /* ======================================= */
-/*             NOTES EDITOR              */
+/*             NOTES EDITOR                */
 /* ======================================= */
 .note-editor-container {
     flex: 1;
@@ -1517,6 +1517,31 @@ body {
     line-height: 1.6;
 }
 
+.note-editor img {
+    max-width: 100%;
+    height: auto;
+    margin: var(--sp-2) 0;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+}
+
+.note-editor img:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.image-loading {
+    padding: var(--sp-4);
+    background: var(--surface-hover);
+    border-radius: var(--radius-md);
+    text-align: center;
+    color: var(--text-secondary);
+    margin: var(--sp-2) 0;
+}
+
+.image-loading i {
+    margin-right: var(--sp-2);
+}
+
 /* ======================================= */
 /*               FOLDERS STYLES            */
 /* ======================================= */
@@ -1648,7 +1673,8 @@ body {
 
 .folder-count {
     background: var(--neutral-200);
-    color: var (--text-secondary);
+    color: var(--text-secondary);
+    /* corrigé : suppression de l'espace après var */
     padding: 0.125rem var(--sp-2);
     border-radius: 1rem;
     font-size: 0.75rem;
@@ -1758,7 +1784,7 @@ body {
 }
 
 /* ======================================= */
-/*                 MODAL                 */
+/*                 MODAL                   */
 /* ======================================= */
 .modal,
 .preview-modal,
@@ -1811,7 +1837,8 @@ body {
 }
 
 .modal .form-group {
-    margin-bottom: var (--sp-4);
+    margin-bottom: var(--sp-4);
+    /* corrigé : suppression de l'espace après var */
 }
 
 .modal .form-control {
@@ -2157,7 +2184,7 @@ body {
 
     .header-content {
         flex-direction: column;
-        gap: var (--sp-3);
+        gap: var(--sp-3);
     }
 
     .header-actions {
@@ -2268,7 +2295,6 @@ body {
     }
 }
 
-/* Très petits écrans mobiles */
 @media (max-width: 480px) {
     .container {
         padding: var(--sp-2);
@@ -2381,7 +2407,6 @@ body {
 
     .format-group {
         padding: var(--sp-1) var(--sp-2);
-        /* Réduction de la taille des groupes de formatage */
         gap: var(--sp-1);
         transform: scale(0.9);
         width: auto;
@@ -2391,14 +2416,12 @@ body {
     .format-btn {
         padding: var(--sp-1);
         min-width: 32px;
-        /* Réduction de la taille minimum */
         min-height: 32px;
         transform: scale(0.9);
     }
 
     .format-group i {
         font-size: 0.8rem;
-        /* Réduction de la taille des icônes */
     }
 
     .newnote {
@@ -2425,8 +2448,6 @@ body {
 /* ======================================= */
 /*               Search note               */
 /* ======================================= */
-
-
 .form-controlPanel {
     width: 50%;
     padding: var(--sp-3);

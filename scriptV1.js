@@ -1545,6 +1545,79 @@ document.addEventListener("DOMContentLoaded", async () => {
     }, 500));
   }
 
+  if (elements.noteEditor) {
+    elements.noteEditor.addEventListener('paste', async (e) => {
+      e.preventDefault();
+
+      // Gérer le collage de texte normal
+      if (e.clipboardData.getData('text/plain')) {
+        document.execCommand('insertText', false, e.clipboardData.getData('text/plain'));
+      }
+
+      // Gérer le collage d'images
+      const items = Array.from(e.clipboardData.items);
+      for (const item of items) {
+        if (item.type.startsWith('image')) {
+          const file = item.getAsFile();
+          const loadingId = 'img-loading-' + Date.now();
+
+          // Insérer un placeholder pendant le chargement
+          const loadingElement = `<div id="${loadingId}" class="image-loading">
+                    <i class="fas fa-spinner fa-spin"></i>Uploading image...
+                </div>`;
+          document.execCommand('insertHTML', false, loadingElement);
+
+          try {
+            // Convertir l'image en Base64
+            const base64 = await convertImageToBase64(file);
+
+            // Uploader l'image vers le storage Supabase
+            const { data, error } = await supabase.storage
+              .from('notes-images')
+              .upload(`${currentUserId}/${Date.now()}-${file.name}`, file);
+
+            if (error) throw error;
+
+            // Obtenir l'URL publique de l'image
+            const { data: { publicUrl } } = supabase.storage
+              .from('notes-images')
+              .getPublicUrl(data.path);
+
+            // Remplacer le placeholder par l'image
+            const loadingElement = document.getElementById(loadingId);
+            if (loadingElement) {
+              const img = `<img src="${publicUrl}" alt="Pasted image">`;
+              loadingElement.outerHTML = img;
+            }
+
+            // Sauvegarder le contenu de la note
+            await saveCurrentNoteContent();
+
+          } catch (error) {
+            console.error('Error uploading image:', error);
+            showToast('Error uploading image', 'error');
+
+            // Supprimer le placeholder en cas d'erreur
+            const loadingElement = document.getElementById(loadingId);
+            if (loadingElement) {
+              loadingElement.remove();
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // Fonction utilitaire pour convertir une image en Base64
+  function convertImageToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
   elements.notebooksList.addEventListener('click', e => {
     const collapseIcon = e.target.closest('.collapse-icon');
     if (!collapseIcon) return;

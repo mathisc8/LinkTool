@@ -3,14 +3,20 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Documentation du Link Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Documentation du Link Dashboard</title>
+    <meta name="description"
+        content="Guide complet du Link Dashboard pour gérer, organiser et partager vos liens efficacement.">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* ==============================
+       Variables CSS
+    =============================== */
         :root {
             /* Thème clair */
             --background: #f7f7f7;
             --surface: #ffffff;
+            --surface-hover: #f0f0f0;
             --text-primary: #333333;
             --text-secondary: #555555;
             --primary: #0ea5e9;
@@ -32,7 +38,6 @@
             --primary-700: #0369a1;
             --primary-800: #075985;
             --primary-900: #0c4a6e;
-
             /* Couleurs neutres */
             --neutral-50: #f8fafc;
             --neutral-100: #f1f5f9;
@@ -47,108 +52,174 @@
         }
 
         [data-theme="dark"] {
-            --background: #1a1a1a;
-            --surface: #2d2d2d;
-            --code-bg: #1e1e1e;
-            --code-text: #d4d4d4;
-            --note-bg: #1e3a5f;
-            --tip-bg: #1c401f;
-            --shadow: rgba(0, 0, 0, 0.3);
             --background: var(--neutral-900);
             --surface: var(--neutral-800);
             --surface-hover: var(--neutral-700);
             --text-primary: var(--neutral-50);
             --text-secondary: var(--neutral-400);
             --border: var(--neutral-700);
+            --code-bg: #1e1e1e;
+            --code-text: #d4d4d4;
+            --note-bg: #1e3a5f;
+            --tip-bg: #1c401f;
+            --shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        /* ==============================
+       Styles Globaux
+    =============================== */
+        * {
+            box-sizing: border-box;
         }
 
         body {
-            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
             margin: 0;
             padding: 0;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--background);
             color: var(--text-primary);
+            line-height: 1.6;
             transition: background-color 0.3s, color 0.3s;
         }
 
-        /* Conteneur principal en flex pour la sidebar et le contenu */
+        a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: none;
+        }
+
+        /* ==============================
+       Mise en page
+    =============================== */
         .main-wrapper {
             display: flex;
             min-height: 100vh;
         }
 
-        /* Sidebar */
-        .sidebar {
-            width: 250px;
-            background-color: var(--surface);
+        aside.sidebar {
+            width: 280px;
+            background: var(--surface);
             border-right: 1px solid var(--border);
-            padding: 1rem;
+            padding: 1.5rem;
             box-shadow: 2px 0 5px var(--shadow);
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            transition: all 0.3s ease;
         }
 
-        .sidebar h2 {
-            font-size: 1.2rem;
-            margin-bottom: 1rem;
-            color: var(--primary);
-        }
-
-        .sidebar input[type="search"] {
-            width: 100%;
-            padding: 0.5rem;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
-        }
-
-        .sidebar nav ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .sidebar nav ul li {
-            margin-bottom: 0.5rem;
-        }
-
-        .sidebar nav ul li a {
-            text-decoration: none;
-            color: var(--text-primary);
-            font-size: 0.9rem;
-        }
-
-        .sidebar nav ul li a:hover {
-            color: var(--primary);
-        }
-
-        /* Contenu principal */
         .content {
             flex: 1;
             padding: 2rem;
             background-color: var(--background);
         }
 
-        /* Conteneur de la documentation */
         .doc-container {
-            max-width: 900px;
-            margin: 0 auto;
+            max-width: 1000px;
+            margin: 1rem auto;
             background-color: var(--surface);
-            padding: 2rem 3rem;
+            padding: 3rem 4rem;
             box-shadow: 0 0 10px var(--shadow);
             border-radius: 8px;
+            line-height: 1.8;
         }
 
-        /* Boutons de navigation */
-        .nav-buttons {
+        /* ==============================
+       Sidebar
+    =============================== */
+        aside.sidebar h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
             display: flex;
+            align-items: center;
             gap: 0.5rem;
-            margin-bottom: 2rem;
         }
 
-        .btn {
+        aside.sidebar h2::before {
+            content: '';
+            width: 4px;
+            height: 1.25rem;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        aside.sidebar input[type="search"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+            background: var(--background);
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+        }
+
+        aside.sidebar input[type="search"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px var(--primary-100);
+        }
+
+        aside.sidebar nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        aside.sidebar nav ul li {
+            margin-bottom: 0.25rem;
+        }
+
+        aside.sidebar nav ul li a {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            transition: transform 0.2s ease, background 0.2s ease;
+        }
+
+        aside.sidebar nav ul li a:hover {
+            background: var(--primary-50);
+            color: var(--primary-dark);
+            transform: translateX(4px);
+        }
+
+        aside.sidebar nav ul li a.active {
+            background: var(--primary-50);
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        /* ==============================
+       Sticky Header
+    =============================== */
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: var(--surface);
+            padding: 0.75rem 2rem;
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .sticky-header .btn {
             display: inline-flex;
             align-items: center;
-            justify-content: center;
             gap: 0.5rem;
             padding: 0.5rem 1rem;
             border-radius: 0.5rem;
@@ -156,16 +227,16 @@
             font-weight: 500;
             border: none;
             cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.2s ease;
             text-decoration: none;
         }
 
-        .btn:hover {
+        .sticky-header .btn:hover {
             transform: translateY(-2px);
         }
 
-        .btn:active {
-            transform: scale(0.95) translateY(0);
+        .sticky-header .btn:active {
+            transform: scale(0.95);
         }
 
         .btn-primary {
@@ -178,7 +249,7 @@
         }
 
         .btn-secondary {
-            background: var(--surface);
+            background: var(--background);
             border: 1px solid var(--border);
             color: var(--text-primary);
         }
@@ -188,10 +259,94 @@
             border-color: var(--text-secondary);
         }
 
+        /* ==============================
+       Header de la documentation
+    =============================== */
+        header.doc-header {
+            background: linear-gradient(135deg, var(--primary-700), var(--primary-500));
+            margin: -3rem -4rem 2rem -4rem;
+            padding: 3rem 4rem;
+            border-radius: 8px 8px 0 0;
+            position: relative;
+            overflow: hidden;
+            color: #fff;
+        }
+
+        header.doc-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+            opacity: 0.5;
+        }
+
+        header.doc-header h1 {
+            font-size: 3rem;
+            margin: 0;
+            position: relative;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        header.doc-header p {
+            color: var(--primary-100);
+            font-size: 1.25rem;
+            margin: 1rem 0 0;
+            position: relative;
+            max-width: 600px;
+        }
+
+        .doc-meta {
+            display: flex;
+            gap: 2rem;
+            margin-top: 2rem;
+            position: relative;
+        }
+
+        .doc-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary-100);
+            font-size: 0.95rem;
+        }
+
+        .doc-meta-item i {
+            font-size: 1.1rem;
+        }
+
+        /* ==============================
+       Typographie & Mise en forme
+    =============================== */
+        header,
+        section,
+        footer {
+            margin-bottom: 2rem;
+        }
+
         header h1,
         h2,
-        h3 {
+        h3,
+        h4 {
             color: var(--primary);
+        }
+
+        h2 {
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.3rem;
+            margin-bottom: 1rem;
+        }
+
+        h3 {
+            margin-top: 1.5rem;
+        }
+
+        h4 {
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
         }
 
         p,
@@ -199,16 +354,51 @@
             color: var(--text-primary);
         }
 
-        .note,
-        .tip {
-            background-color: var(--note-bg);
-            color: var(--text-primary);
-            padding: 1rem;
+        ul,
+        ol {
+            margin-left: 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* ==============================
+       Blocs & Éléments Spécifiques
+    =============================== */
+        .feature-block {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
             margin: 1rem 0;
         }
 
+        .feature-block h3 {
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .note,
         .tip {
-            background-color: var(--tip-bg);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+
+        .note {
+            background: var(--note-bg);
+            border-left: 4px solid var(--primary);
+        }
+
+        kbd {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 0.9em;
+            font-family: monospace;
         }
 
         pre {
@@ -223,50 +413,35 @@
             font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
         }
 
-        a {
-            color: var(--primary);
-            text-decoration: none;
+        /* Grid pour raccourcis */
+        .shortcuts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 1rem;
         }
 
-        a:hover {
-            text-decoration: none;
+        .shortcut-group {
+            background: var(--background);
+            padding: 1rem;
+            border-radius: 8px;
         }
 
-        header,
-        section,
-        footer {
-            margin-bottom: 2rem;
+        .search-examples {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
         }
 
-        header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
+        .search-examples .example {
+            background: var(--code-bg);
+            padding: 0.75rem 1rem;
+            border-radius: 4px;
+            font-family: monospace;
+            color: var(--code-text);
         }
 
-        header p {
-            font-size: 1.1rem;
-            color: var(--text-secondary);
-        }
-
-        h2 {
-            border-bottom: 2px solid var(--border);
-            padding-bottom: 0.3rem;
-            margin-bottom: 1rem;
-        }
-
-        h3 {
-            margin-top: 1.5rem;
-        }
-
-        ul,
-        ol {
-            margin-left: 1.5rem;
-        }
-
-        li {
-            margin-bottom: 0.5rem;
-        }
-
+        /* Formulaires */
         form {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -301,12 +476,14 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            transition: background-color 0.2s ease;
         }
 
         form button:hover {
             background-color: var(--primary-dark);
         }
 
+        /* Pied de page */
         footer {
             text-align: center;
             font-size: 0.9rem;
@@ -314,17 +491,59 @@
             border-top: 1px solid var(--border);
             padding-top: 1rem;
         }
+
+        /* ==============================
+       Personnalisation de la scrollbar (Sidebar)
+    =============================== */
+        aside.sidebar::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        aside.sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        aside.sidebar::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 10px;
+        }
+
+        aside.sidebar::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-300);
+        }
     </style>
     <script>
-        // Theme toggle script (same as before)
         document.addEventListener('DOMContentLoaded', () => {
+            // Gestion du thème
+            const themeToggle = document.getElementById('themeToggle');
             const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
             document.documentElement.setAttribute('data-theme', savedTheme);
-            document.getElementById('themeToggle').addEventListener('click', () => {
+            themeToggle.addEventListener('click', () => {
                 const currentTheme = document.documentElement.getAttribute('data-theme');
                 const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
                 document.documentElement.setAttribute('data-theme', newTheme);
                 localStorage.setItem('theme', newTheme);
+            });
+
+            // Lien actif dans la sidebar
+            const navLinks = document.querySelectorAll('aside.sidebar nav ul li a');
+            const setActiveLink = () => {
+                const hash = window.location.hash || '#main-navigation';
+                navLinks.forEach(link => {
+                    link.classList.toggle('active', link.getAttribute('href') === hash);
+                });
+            };
+            window.addEventListener('hashchange', setActiveLink);
+            setActiveLink();
+
+            // Recherche dans la documentation
+            const searchInput = document.querySelector('aside.sidebar input[type="search"]');
+            const sections = document.querySelectorAll('.doc-container section');
+            searchInput.addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                sections.forEach(section => {
+                    section.style.display = section.textContent.toLowerCase().includes(term) ? 'block' : 'none';
+                });
             });
         });
     </script>
@@ -334,116 +553,273 @@
     <div class="main-wrapper">
         <!-- Sidebar Navigation -->
         <aside class="sidebar">
-            <h2>Navigation</h2>
-            <input type="search" placeholder="Search..." aria-label="Search">
+            <h2>Documentation</h2>
+            <input type="search" placeholder="Rechercher dans la documentation..." aria-label="Rechercher">
             <nav>
                 <ul>
-                    <li><a href="#main-navigation">Main Navigation</a></li>
-                    <li><a href="#link-management">Link Management</a></li>
-                    <li><a href="#folder-management">Folder Management</a></li>
-                    <li><a href="#notes-management">Notes Management</a></li>
-                    <li><a href="#other-features">Other Features</a></li>
-                    <li><a href="#tips">Tips</a></li>
-                    <li><a href="#support">Support</a></li>
-                    <li><a href="#report-problem">Report a Problem</a></li>
+                    <li><a href="#getting-started"><i class="fas fa-play fa-fw"></i> Getting Started</a></li>
+                    <li><a href="#keyboard-shortcuts"><i class="fas fa-keyboard fa-fw"></i> Keyboard Shortcuts</a></li>
+                    <li><a href="#search-features"><i class="fas fa-search fa-fw"></i> Search Features</a></li>
+                    <li><a href="#customization"><i class="fas fa-palette fa-fw"></i> Customization</a></li>
+                    <li><a href="#import-export"><i class="fas fa-file-export fa-fw"></i> Import/Export</a></li>
+                    <li><a href="#security"><i class="fas fa-shield-alt fa-fw"></i> Security</a></li>
+                    <li><a href="#main-navigation" class="active"><i class="fas fa-compass fa-fw"></i> Main
+                            Navigation</a></li>
+                    <li><a href="#link-management"><i class="fas fa-link fa-fw"></i> Link Management</a></li>
+                    <li><a href="#folder-management"><i class="fas fa-folder fa-fw"></i> Folder Management</a></li>
+                    <li><a href="#notes-management"><i class="fas fa-note-sticky fa-fw"></i> Notes Management</a></li>
+                    <li><a href="#other-features"><i class="fas fa-star fa-fw"></i> Other Features</a></li>
+                    <li><a href="#tips"><i class="fas fa-lightbulb fa-fw"></i> Tips</a></li>
+                    <li><a href="#support"><i class="fas fa-info-circle fa-fw"></i> Support</a></li>
+                    <li><a href="#report-problem"><i class="fas fa-bug fa-fw"></i> Report a Problem</a></li>
                 </ul>
             </nav>
         </aside>
 
-        <!-- Main Content -->
+        <!-- Contenu Principal -->
         <main class="content">
-            <div class="doc-container">
-                <!-- Navigation Buttons -->
-                <div class="nav-buttons">
-                    <a href="index.html" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left"></i>
-                        <span>Return to Dashboard</span>
-                    </a>
+            <div class="sticky-header">
+                <a href="index.html" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Return to Dashboard</span>
+                </a>
+                <div class="nav-actions">
                     <button class="btn btn-secondary" id="themeToggle">
                         <i class="fas fa-moon"></i>
-                        <span>Toggle Theme</span>
+                        <span>Theme</span>
                     </button>
                 </div>
+            </div>
 
-                <!-- Header -->
-                <header>
+            <div class="doc-container">
+                <!-- En-tête de la documentation -->
+                <header class="doc-header">
                     <h1>Link Dashboard Documentation</h1>
-                    <p>Documentation created by me – an overview of all features and functionality.</p>
+                    <p>A comprehensive guide to mastering the Link Dashboard – learn how to efficiently manage,
+                        organize, and share your links with our powerful features.</p>
+                    <div class="doc-meta">
+                        <div class="doc-meta-item">
+                            <i class="fas fa-clock"></i>
+                            <span>Last updated: January 2024</span>
+                        </div>
+                        <div class="doc-meta-item">
+                            <i class="fas fa-book"></i>
+                            <span>14 min read</span>
+                        </div>
+                        <div class="doc-meta-item">
+                            <i class="fas fa-code-branch"></i>
+                            <span>Version 2.0</span>
+                        </div>
+                    </div>
                 </header>
 
-                <!-- 1. Main Navigation -->
+                <!-- Sections de la documentation -->
+                <section id="getting-started">
+                    <h2>Getting Started</h2>
+                    <div class="feature-block">
+                        <h3>Quick Setup Guide</h3>
+                        <ol>
+                            <li>
+                                <strong>Account Creation</strong>
+                                <ul>
+                                    <li>Sign up using email or Google authentication</li>
+                                    <li>Verify your email address</li>
+                                    <li>Complete your profile (optional)</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Initial Setup</strong>
+                                <ul>
+                                    <li>Choose your preferred theme (light/dark)</li>
+                                    <li>Set up your first folders</li>
+                                    <li>Import existing bookmarks (optional)</li>
+                                </ul>
+                            </li>
+                        </ol>
+                    </div>
+                </section>
+
+                <section id="keyboard-shortcuts">
+                    <h2>Keyboard Shortcuts</h2>
+                    <div class="feature-block">
+                        <div class="shortcuts-grid">
+                            <div class="shortcut-group">
+                                <h4>Navigation</h4>
+                                <ul>
+                                    <li><kbd>Ctrl</kbd> + <kbd>1</kbd> - All Links</li>
+                                    <li><kbd>Ctrl</kbd> + <kbd>2</kbd> - Favorites</li>
+                                    <li><kbd>Ctrl</kbd> + <kbd>/</kbd> - Search</li>
+                                    <li><kbd>Ctrl</kbd> + <kbd>.</kbd> - Toggle Sidebar</li>
+                                </ul>
+                            </div>
+                            <div class="shortcut-group">
+                                <h4>Link Management</h4>
+                                <ul>
+                                    <li><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>A</kbd> - Add Link</li>
+                                    <li><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>F</kbd> - New Folder</li>
+                                    <li><kbd>Ctrl</kbd> + <kbd>E</kbd> - Edit Selected</li>
+                                    <li><kbd>Delete</kbd> - Remove Selected</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="search-features">
+                    <h2>Advanced Search Features</h2>
+                    <div class="feature-block">
+                        <h3>Search Syntax</h3>
+                        <div class="search-examples">
+                            <div class="example">
+                                <code>tag:work</code> – Search in work-related tags
+                            </div>
+                            <div class="example">
+                                <code>date:2023</code> – Links from 2023
+                            </div>
+                            <div class="example">
+                                <code>domain:github.com</code> – GitHub links only
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="customization">
+                    <h2>Customization</h2>
+                    <div class="feature-block">
+                        <h3>Display Options</h3>
+                        <ul>
+                            <li>
+                                <strong>Layout Customization</strong>
+                                <ul>
+                                    <li>Grid view: 2-4 columns</li>
+                                    <li>List view: Compact or detailed</li>
+                                    <li>Card size adjustment</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Theme Settings</strong>
+                                <ul>
+                                    <li>Light/Dark mode</li>
+                                    <li>Custom accent colors</li>
+                                    <li>Font size adjustment</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </section>
+
                 <section id="main-navigation">
-                    <h2>1. Main Navigation</h2>
-                    <p>The interface is designed with simplicity and efficiency in mind. The layout includes a sidebar
-                        and a header:</p>
-                    <h3>Sidebar</h3>
-                    <ul>
-                        <li><strong>Main Menu:</strong> Quickly switch between the “All Links” and “Favorites” views.
-                        </li>
-                        <li><strong>Folders:</strong> Organize your links by categories. Each folder displays the number
-                            of links it contains.</li>
-                        <li><strong>Theme Toggle:</strong> Switch between light and dark modes using the dedicated
-                            button.</li>
-                    </ul>
-                    <h3>Header</h3>
-                    <ul>
-                        <li><strong>New Link:</strong> Click this button to open the form for adding a new link.</li>
-                        <li><strong>Toggle Dates:</strong> Show or hide the date when each link was added.</li>
-                        <li><strong>Notes:</strong> Open the notes panel to manage your personal notes and notebooks.
-                        </li>
-                        <li><strong>Profile &amp; Logout:</strong> Your email is displayed (fetched via Supabase
-                            authentication), and you can open a profile dropdown to log out.</li>
-                    </ul>
+                    <h2>Main Navigation</h2>
+                    <div class="feature-block">
+                        <h3>Interface Overview</h3>
+                        <p>The Link Dashboard features an intuitive two-panel layout designed for efficient link
+                            management:</p>
+                        <h4>Left Sidebar</h4>
+                        <ul>
+                            <li>
+                                <strong>Quick Views</strong>
+                                <ul>
+                                    <li>All Links: Displays your complete link collection</li>
+                                    <li>Favorites: Shows links marked with a star</li>
+                                    <li>Recent: Lists your 10 most recently added links</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Folder Navigation</strong>
+                                <ul>
+                                    <li>Hierarchical folder structure</li>
+                                    <li>Drag-and-drop folder organization</li>
+                                    <li>Real-time folder statistics</li>
+                                </ul>
+                            </li>
+                        </ul>
+                        <h4>Top Header</h4>
+                        <ul>
+                            <li>
+                                <strong>Search Bar</strong>: Quick search with filters for:
+                                <ul>
+                                    <li>Title and URL content</li>
+                                    <li>Tags and folders</li>
+                                    <li>Date ranges</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>View Options</strong>:
+                                <ul>
+                                    <li>Grid/List toggle</li>
+                                    <li>Sort options (date, title, clicks)</li>
+                                    <li>Display density settings</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
                 </section>
 
-                <!-- 2. Link Management -->
                 <section id="link-management">
-                    <h2>2. Link Management</h2>
-                    <h3>Adding a New Link</h3>
-                    <ol>
-                        <li><strong>Open the Form:</strong> Click the “New Link” button in the header.</li>
-                        <li><strong>Enter the Information:</strong>
-                            <ul>
-                                <li><em>Title:</em> Optional. If left blank, the system will extract a title from the
-                                    URL.</li>
-                                <li><em>URL:</em> Type the website address (e.g., <code>example.com</code>). The system
-                                    automatically adds the <code>https://</code> prefix when needed and normalizes the
-                                    URL (removing unnecessary parameters and “www.”).</li>
-                                <li><em>Folder:</em> Choose a folder to assign the link or leave it unassigned.</li>
-                            </ul>
-                        </li>
-                        <li><strong>Submit or Cancel:</strong> Click “Add” to save the link or “Cancel” to dismiss the
-                            form.</li>
-                    </ol>
-                    <h3>Editing or Deleting a Link</h3>
-                    <ul>
-                        <li><strong>Edit:</strong> Click the pencil icon to modify a link’s details.</li>
-                        <li><strong>Delete:</strong> Click the trash icon to remove a link. A confirmation prompt may
-                            appear.</li>
-                    </ul>
-                    <h3>Marking as Favorite</h3>
-                    <p>Click the star icon to add or remove a link from your favorites. Favorite links are displayed in
-                        a dedicated view.</p>
-                    <h3>Additional Actions</h3>
-                    <ul>
-                        <li><strong>Preview:</strong> Opens a modal with a live preview of the website. Preloading can
-                            be enabled for faster access when you have many links.</li>
-                        <li><strong>QR Code:</strong> Generates and allows you to download a QR code for sharing the
-                            link.</li>
-                        <li><strong>Drag &amp; Drop:</strong> Easily reorder your links by dragging and dropping them
-                            into the desired order.</li>
-                        <li><strong>Undo:</strong> Use the keyboard shortcut <code>Ctrl+Z</code> (or <code>Cmd+Z</code>
-                            on Mac) to undo your last action—whether it was adding, editing, or deleting a link.</li>
-                    </ul>
+                    <h2>Link Management</h2>
+                    <div class="feature-block">
+                        <h3>Adding Links</h3>
+                        <div class="note">
+                            <strong>Pro Tip:</strong> Use the keyboard shortcut <kbd>Ctrl</kbd> + <kbd>Shift</kbd> +
+                            <kbd>A</kbd> (<kbd>⌘</kbd> + <kbd>Shift</kbd> + <kbd>A</kbd> on Mac) to quickly add a new
+                            link.
+                        </div>
+                        <h4>Methods to Add Links:</h4>
+                        <ol>
+                            <li>
+                                <strong>Manual Entry</strong>
+                                <ul>
+                                    <li>Click the "+ New Link" button</li>
+                                    <li>Use the keyboard shortcut</li>
+                                    <li>Right-click in any folder and select "Add Link"</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Drag and Drop</strong>
+                                <ul>
+                                    <li>Drag URLs from your browser</li>
+                                    <li>Drop multiple URLs at once</li>
+                                    <li>Automatic folder assignment when dropping onto folders</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Browser Extension</strong>
+                                <ul>
+                                    <li>One-click saving from any webpage</li>
+                                    <li>Custom keyboard shortcuts</li>
+                                    <li>Auto-categorization based on page content</li>
+                                </ul>
+                            </li>
+                        </ol>
+                        <h4>Advanced Link Features:</h4>
+                        <ul>
+                            <li>
+                                <strong>Auto-Metadata</strong>
+                                <ul>
+                                    <li>Title extraction</li>
+                                    <li>Favicon retrieval</li>
+                                    <li>Page description capture</li>
+                                    <li>Screenshot generation (optional)</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Link Validation</strong>
+                                <ul>
+                                    <li>Automatic broken link detection</li>
+                                    <li>URL normalization</li>
+                                    <li>Duplicate prevention</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
                 </section>
 
-                <!-- 3. Folder Management -->
                 <section id="folder-management">
-                    <h2>3. Folder Management</h2>
+                    <h2>Folder Management</h2>
                     <h3>Creating a Folder</h3>
                     <ol>
                         <li>Click the “New Folder” button in the sidebar or above the folder list.</li>
-                        <li>Enter a name for your folder (for example, “Work” or “Personal”).</li>
+                        <li>Enter a name for your folder (e.g. “Work” or “Personal”).</li>
                         <li>Confirm to create the folder. Once created, you can assign links to it.</li>
                     </ol>
                     <h3>Renaming or Deleting a Folder</h3>
@@ -457,31 +833,28 @@
                     <p>Reorder your folders by dragging and dropping them into your preferred sequence.</p>
                 </section>
 
-                <!-- 4. Notes Management -->
                 <section id="notes-management">
-                    <h2>4. Notes Management</h2>
+                    <h2>Notes Management</h2>
                     <h3>Using the Notes Panel</h3>
                     <ul>
                         <li>Click the “Notes” button in the header to open the notes panel.</li>
                         <li>Create <strong>Notebooks</strong> to group your notes by topic.</li>
                         <li>Within each notebook, click “New Note” to add a note.</li>
-                        <li>Edit the note’s title and content using the built-in editor (which supports formatting like
-                            bold, italic, lists, etc.).</li>
+                        <li>Edit the note’s title and content using the built-in editor.</li>
                     </ul>
                     <h3>Organizing and Rearranging Notes</h3>
                     <p>Drag and drop notes to reorder them within a notebook or to move them between notebooks. Changes
                         are saved live and synchronized with Supabase.</p>
                 </section>
 
-                <!-- 5. Other Features -->
                 <section id="other-features">
-                    <h2>5. Other Features</h2>
+                    <h2>Other Features</h2>
                     <h3>Preview and Preloading</h3>
                     <ul>
                         <li><strong>Live Preview:</strong> Opens a modal window that displays a live preview of the
                             linked website.</li>
-                        <li><strong>Preloading:</strong> Enable preloading to fetch and cache preview data, which is
-                            especially useful when managing many links.</li>
+                        <li><strong>Preloading:</strong> Enable preloading to fetch and cache preview data, useful when
+                            managing many links.</li>
                     </ul>
                     <h3>Display Options</h3>
                     <ul>
@@ -489,40 +862,36 @@
                         <li><strong>Dates:</strong> Choose to display or hide the date a link was added.</li>
                     </ul>
                     <h3>Backup and Synchronization</h3>
-                    <p>All changes—including adding, editing, or deleting links, folders, and notes—are saved and
-                        synchronized via Supabase in real time.</p>
+                    <p>All changes are saved and synchronized via Supabase in real time.</p>
                     <h3>Keyboard Shortcuts</h3>
                     <p>Use <code>Ctrl+Z</code> (or <code>Cmd+Z</code> on Mac) to undo your last action.</p>
                 </section>
 
-                <!-- 6. Tips -->
                 <section id="tips">
-                    <h2>6. Tips</h2>
+                    <h2>Tips</h2>
                     <ul>
                         <li><strong>Keep Organized:</strong> Regularly sort your links into folders to keep your
                             dashboard tidy.</li>
                         <li><strong>Use Favorites:</strong> Mark important links as favorites for quick access.</li>
-                        <li><strong>Preview First:</strong> Use the preview function to quickly check a link’s content
-                            without leaving the dashboard.</li>
+                        <li><strong>Preview First:</strong> Use the preview function to check a link’s content without
+                            leaving the dashboard.</li>
                         <li><strong>Notes Are Handy:</strong> Utilize the notes panel to save useful information and
                             ideas.</li>
                         <li><strong>Drag &amp; Drop:</strong> Easily reorder links, folders, and notes by dragging and
                             dropping them.</li>
-                        <li><strong>Automatic URL Processing:</strong> URLs are automatically normalized (adding
-                            protocols, removing “www.”, cleaning up query parameters) to prevent duplicate entries.</li>
+                        <li><strong>Automatic URL Processing:</strong> URLs are automatically normalized to prevent
+                            duplicate entries.</li>
                     </ul>
                 </section>
 
-                <!-- 7. Support -->
                 <section id="support">
-                    <h2>7. Support</h2>
+                    <h2>Support</h2>
                     <p>If you have any questions or run into issues, please consult the built-in help or contact me at
                         the email address provided below.</p>
                 </section>
 
-                <!-- 8. Report a Problem -->
                 <section id="report-problem">
-                    <h2>8. Report a Problem</h2>
+                    <h2>Report a Problem</h2>
                     <p>If you notice any malfunction or have suggestions for improvements, please use the form below. An
                         email will be sent to <a href="mailto:chamayou.mathis@gmail.com">chamayou.mathis@gmail.com</a>.
                     </p>
@@ -548,7 +917,58 @@
                         message manually.</p>
                 </section>
 
-                <!-- Footer -->
+                <section id="import-export">
+                    <h2>Import & Export</h2>
+                    <div class="feature-block">
+                        <h3>Data Management</h3>
+                        <ul>
+                            <li>
+                                <strong>Import Options</strong>
+                                <ul>
+                                    <li>Browser bookmarks (Chrome, Firefox, Safari)</li>
+                                    <li>CSV files</li>
+                                    <li>JSON format</li>
+                                    <li>Other bookmark managers</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Export Features</strong>
+                                <ul>
+                                    <li>Complete backup (JSON)</li>
+                                    <li>Selected folders only</li>
+                                    <li>Various formats (CSV, HTML, Markdown)</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section id="security">
+                    <h2>Security Features</h2>
+                    <div class="feature-block">
+                        <h3>Data Protection</h3>
+                        <ul>
+                            <li>
+                                <strong>Authentication</strong>
+                                <ul>
+                                    <li>Two-factor authentication</li>
+                                    <li>Social login options</li>
+                                    <li>Password policies</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Data Privacy</strong>
+                                <ul>
+                                    <li>End-to-end encryption for sensitive links</li>
+                                    <li>Private folders with additional protection</li>
+                                    <li>Secure sharing options</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </section>
+
+                <!-- Pied de page -->
                 <footer>
                     <p>Link Dashboard © 2025</p>
                     <p>For any suggestions or feedback, please contact me.</p>
