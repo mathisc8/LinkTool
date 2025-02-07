@@ -1,0 +1,491 @@
+/****************************************************
+  Palette de couleurs et variables globales
+*****************************************************/
+:root {
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+
+    --transition-fast: 0.1s ease-in-out;
+    --transition-normal: 0.2s ease-in-out;
+
+    /* Couleurs claires (light) */
+    --background-light: #f7f9fa;
+    --surface-light: #ffffff;
+    --text-primary-light: #1f2937;
+    --text-secondary-light: #6b7280;
+    --border-light: #d1d5db;
+
+    --primary-light: #3b82f6;
+    /* Bleu */
+    --primary-hover-light: #2563eb;
+    /* Bleu un peu plus foncé */
+
+    /* Couleurs sombres (dark) */
+    --background-dark: #1e1e1e;
+    --surface-dark: #2a2a2a;
+    --text-primary-dark: #ffffff;
+    --text-secondary-dark: #a5a5a5;
+    --border-dark: #3d4145;
+
+    --primary-dark: #3b82f6;
+    --primary-hover-dark: #2563eb;
+}
+
+/* Thème clair */
+[data-theme="light"] {
+    --background: var(--background-light);
+    --surface: var(--surface-light);
+    --text-primary: var(--text-primary-light);
+    --text-secondary: var(--text-secondary-light);
+    --border: var(--border-light);
+
+    --primary: var(--primary-light);
+    --primary-hover: var(--primary-hover-light);
+}
+
+/* Thème sombre */
+[data-theme="dark"] {
+    --background: var(--background-dark);
+    --surface: var(--surface-dark);
+    --text-primary: var(--text-primary-dark);
+    --text-secondary: var(--text-secondary-dark);
+    --border: var(--border-dark);
+
+    --primary: var(--primary-dark);
+    --primary-hover: var(--primary-hover-dark);
+}
+
+/****************************************************
+    Reset & base
+  *****************************************************/
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: sans-serif;
+}
+
+body {
+    background: var(--background);
+    color: var(--text-primary);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    transition: background var(--transition-normal), color var(--transition-normal);
+}
+
+/****************************************************
+    Header
+  *****************************************************/
+.header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    color: var(--text-primary);
+    padding: 0.75rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    transition: background var(--transition-normal), color var(--transition-normal);
+}
+
+.header h1 {
+    font-size: 1.4rem;
+    margin: 0;
+}
+
+.header__left,
+.header__right {
+    display: flex;
+    align-items: center;
+}
+
+.header__right button {
+    margin-left: 0.5rem;
+}
+
+/****************************************************
+    Main Layout
+  *****************************************************/
+.main {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+    /* pour éviter les scrolls multiples */
+}
+
+@media (max-width: 768px) {
+    .main {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+    }
+}
+
+/****************************************************
+    Sidebar
+  *****************************************************/
+.sidebar {
+    width: 260px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    color: var(--text-primary);
+    transition: background var(--transition-normal), color var(--transition-normal);
+    padding: 1rem;
+    overflow-y: auto;
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.sidebar-header h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.sidebar__section {
+    margin-top: 1rem;
+}
+
+.notebook-item {
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: background var(--transition-fast), transform var(--transition-fast);
+    border: 1px solid var(--border);
+}
+
+.notebook-item:hover {
+    background: rgba(0, 0, 0, 0.04);
+    transform: translateX(2px);
+}
+
+.notebook-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 0.8rem;
+}
+
+.notebook-title.active {
+    background: var(--primary);
+    color: #fff;
+}
+
+.notebook-title-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.notebook-actions {
+    display: flex;
+    gap: 0.3rem;
+}
+
+.notebook-actions .action-btn {
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.notebook-actions .action-btn:hover {
+    color: #e11d48;
+    /* Un rouge pour signaler la poubelle par ex. */
+}
+
+/****************************************************
+    Content area
+  *****************************************************/
+.content-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    overflow-y: auto;
+    transition: background var(--transition-normal), color var(--transition-normal);
+}
+
+/****************************************************
+    Hiérarchie (breadcrumb)
+  *****************************************************/
+.hierarchy {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+    color: var(--text-secondary);
+}
+
+.hierarchy span {
+    position: relative;
+    padding-right: 1rem;
+}
+
+.hierarchy span:not(:last-child)::after {
+    content: '›';
+    position: absolute;
+    right: 0;
+    opacity: 0.5;
+}
+
+/****************************************************
+    Disposition 2 colonnes (notes/pages + éditeur)
+  *****************************************************/
+.main-content-grid {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 1rem;
+    height: calc(100vh - 150px);
+    /* Ajuste selon la hauteur du header/footer */
+    overflow: hidden;
+}
+
+.lists-column {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    gap: 1rem;
+}
+
+/****************************************************
+    Panneaux (Notes, Pages)
+  *****************************************************/
+.notes-panel,
+.pages-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    transition: background var(--transition-normal), color var(--transition-normal);
+    padding: 0.5rem 0.5rem;
+}
+
+.panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.panel-header h3 {
+    font-size: 1rem;
+    margin: 0;
+}
+
+.panel-body {
+    padding: 0.5rem;
+    max-height: calc(100vh - 220px);
+    /* Ajuste selon la taille */
+    overflow-y: auto;
+}
+
+.item-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.item-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.4rem 0.6rem;
+    border-radius: var(--radius-sm);
+    margin-bottom: 0.3rem;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+    border: 1px solid var(--border);
+}
+
+.item-list li:hover {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+}
+
+.item-list li .actions {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.item-list li.active {
+    background: var(--primary);
+    color: white;
+}
+
+.item-list li.active .action-btn {
+    color: white;
+}
+
+.item-list li.active:hover {
+    background: var(--primary-dark);
+}
+
+.action-btn {
+    padding: 0.2rem;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+    color: #e11d48;
+    background: rgba(239, 68, 68, 0.1);
+}
+
+/****************************************************
+    Editeur
+  *****************************************************/
+.editor-container {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+}
+
+.editor-panel {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 1rem;
+    transition: background var(--transition-normal), color var(--transition-normal);
+}
+
+.editor-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    outline: none;
+    min-height: 1.5rem;
+    /* Placeholder custom */
+}
+
+.editor-content {
+    flex: 1;
+    font-size: 1rem;
+    line-height: 1.6;
+    outline: none;
+    border: none;
+    resize: none;
+    overflow-y: auto;
+    min-height: 200px;
+}
+
+/* Placeholder pour contenteditable */
+[contenteditable][data-placeholder]:empty:before {
+    content: attr(data-placeholder);
+    color: var(--text-secondary);
+    pointer-events: none;
+    display: block;
+}
+
+/****************************************************
+    Empty state
+  *****************************************************/
+.empty-state {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--surface);
+    color: var(--text-secondary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    pointer-events: none;
+    /* pour laisser l'éditeur en dessous non cliquable quand affiché */
+    opacity: 1;
+    transition: opacity var(--transition-fast);
+    text-align: center;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: var(--primary);
+    opacity: 0.7;
+}
+
+/* On cachera ou affichera .empty-state via JS en ajustant son opacity ou display */
+
+/****************************************************
+    Boutons
+  *****************************************************/
+.btn {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    transition: background 0.2s ease;
+}
+
+.btn:hover {
+    background: var(--primary-hover);
+}
+
+.btn-sm {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.8rem;
+}
+
+/****************************************************
+    Theme toggle
+  *****************************************************/
+.theme-toggle {
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    padding: 0.4rem;
+    border-radius: 50%;
+    transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.theme-toggle:hover {
+    background: rgba(0, 0, 0, 0.08);
+    transform: scale(1.1);
+}
+
+[data-theme="dark"] .theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/****************************************************
+    Footer
+  *****************************************************/
+.footer {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    color: var(--text-secondary);
+    text-align: center;
+    padding: 0.5rem;
+    font-size: 0.8rem;
+    transition: background var(--transition-normal), color var(--transition-normal);
+}

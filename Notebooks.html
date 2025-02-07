@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Notes Pro - OneNote/Notion-like</title>
+    <!-- Lien vers la feuille de style -->
+    <link rel="stylesheet" href="notebookstyle.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+</head>
+
+<body>
+    <!-- Barre de navigation principale -->
+    <header class="header">
+        <div class="header__left">
+            <h1>Mes Notes</h1>
+        </div>
+        <div class="header__right">
+            <button class="theme-toggle" id="themeToggle" title="Changer le thème">
+                <i class="fas fa-sun"></i>
+            </button>
+            <button class="btn" onclick="window.location.href='index.html'">
+                <i class="fas fa-link"></i>
+                Liens
+            </button>
+            <button class="btn" onclick="goHome()">
+                <i class="fas fa-home"></i>
+                Accueil
+            </button>
+        </div>
+    </header>
+
+    <div class="main">
+        <!-- SIDEBAR : liste des Notebooks -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>Notebooks</h2>
+                <button class="btn btn-sm" onclick="createNotebook()">
+                    <i class="fas fa-plus"></i> New
+                </button>
+            </div>
+            <div id="notebooksList" class="sidebar__section">
+                <!-- Les notebooks seront injectés ici -->
+            </div>
+        </aside>
+
+        <!-- CONTENU PRINCIPAL -->
+        <section class="content-area">
+            <!-- Barre de navigation hiérarchique -->
+            <nav class="hierarchy" id="hierarchyPath">
+                <!-- Le chemin (Notebook > Note > Page) sera injecté ici -->
+            </nav>
+
+            <!-- Disposition en 2 colonnes : notes/pages à gauche, éditeur à droite -->
+            <div class="main-content-grid">
+                <!-- Colonne Notes & Pages -->
+                <div class="lists-column">
+                    <!-- Bloc des Notes -->
+                    <div class="notes-panel">
+                        <div class="panel-header">
+                            <h3>Notes</h3>
+                            <button class="btn btn-sm" onclick="createNote()">+ Note</button>
+                        </div>
+                        <div id="notesList" class="panel-body">
+                            <!-- Liste des notes injectée ici -->
+                        </div>
+                    </div>
+
+                    <!-- Bloc des Pages -->
+                    <div class="pages-panel">
+                        <div class="panel-header">
+                            <h3>Pages</h3>
+                            <button class="btn btn-sm" onclick="createPage()">+ Page</button>
+                        </div>
+                        <div id="pagesList" class="panel-body">
+                            <!-- Liste des pages injectée ici -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Colonne Editeur -->
+                <div class="editor-container">
+                    <div class="editor-panel" id="editorPanel">
+                        <div id="editorTitle" contenteditable="true" data-placeholder="Entrez un titre..."
+                            class="editor-title"></div>
+                        <div id="editorContent" contenteditable="true" data-placeholder="Commencez à écrire..."
+                            class="editor-content"></div>
+                    </div>
+                    <!-- État vide (quand aucune note/page n'est sélectionnée) -->
+                    <div class="empty-state" id="emptyState">
+                        <i class="fas fa-book-open"></i>
+                        <h3>Aucune sélection</h3>
+                        <p>Sélectionnez un Notebook, puis une Note (et éventuellement une Page)</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>2025 - Mon super clone OneNote/Notion - Tous droits réservés</p>
+    </footer>
+
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@latest/dist/umd/supabase.min.js"></script>
+    <!-- Notre script principal -->
+    <script src="Notebookapp.js"></script>
+</body>
+
+</html>
