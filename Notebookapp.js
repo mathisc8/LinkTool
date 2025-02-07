@@ -17,14 +17,13 @@ let selectedPageId = null;
 let editMode = null; // "note" ou "page"
 let currentUserId = null;
 
-// Liste des notes du Notebook sélectionné (pour éviter de recharger en permanence)
+// Liste des notes du Notebook sélectionné
 let currentNotes = [];
 
 /****************************
  * Navigation (exemple)
  ****************************/
 function goHome() {
-    // Par exemple : rediriger vers une page d'accueil
     window.location.href = "accueil.html";
 }
 
@@ -210,11 +209,10 @@ function selectNotebook(notebookId) {
     // Charger les notes du Notebook sélectionné
     loadNotes(notebookId);
 
-    // Réinitialiser la liste des pages (plus aucune note sélectionnée)
+    // Réinitialiser la liste des pages
     loadPages(null);
 
     updateHierarchyPath();
-    // On met l'éditeur en "vide" en attendant qu'une note soit sélectionnée
     showEmptyState(true);
 }
 
@@ -258,9 +256,6 @@ async function renameNotebook(notebookId, newName) {
 
 async function deleteNotebook(notebookId) {
     try {
-        // Supprimer d'abord toutes les notes/pages associées 
-        // si pas de cascade dans la DB (ou si vous préférez un cascade en base, c'est au choix)
-
         // Supprime le Notebook
         const { error } = await supabase
             .from("notebooks")
@@ -366,10 +361,7 @@ function selectNote(noteId) {
     selectedPageId = null;
     editMode = "note";
 
-    // Afficher contenu de la note dans l'éditeur
     showInEditor(note.title, note.content);
-
-    // Charger les pages associées
     loadPages(noteId);
 
     updateHierarchyPath();
@@ -484,14 +476,14 @@ async function loadPages(noteId) {
                 </div>
             `;
 
-            // Clic sur la zone de la page => sélectionner la page
+            // Clic sur la page => sélectionner
             li.addEventListener('click', (e) => {
                 if (!e.target.closest('.delete-btn')) {
                     selectPage(page);
                 }
             });
 
-            // Clic sur bouton "Supprimer"
+            // Clic sur "Supprimer"
             li.querySelector(".delete-btn").addEventListener('click', async (e) => {
                 e.stopPropagation();
                 if (confirm("Voulez-vous vraiment supprimer cette page ?")) {
@@ -517,7 +509,7 @@ function selectPage(page) {
         li.classList.toggle('active', li.dataset.pageId === page.id);
     });
 
-    // Afficher le contenu complet de la page dans l'éditeur
+    // Afficher le contenu de la page dans l'éditeur
     showInEditor(page.title, page.content || '');
     updateHierarchyPath();
     showEmptyState(false);
@@ -595,7 +587,7 @@ function showInEditor(title, content) {
     if (editorTitle && editorContent) {
         editorTitle.textContent = title || "";
 
-        // Nettoyage éventuel du contenu HTML
+        // Nettoyage éventuel du contenu HTML (DOMPurify si besoin)
         if (content) {
             const sanitizedContent = DOMPurify.sanitize(content, {
                 ALLOWED_TAGS: [
@@ -812,12 +804,10 @@ function updateFormatButtonStates() {
  ****************************/
 async function uploadImage(file) {
     try {
-        // Nom de fichier unique
         const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
         const filePath = `${currentUserId}/${fileName}`;
 
-        // Upload vers le bucket "notes-images"
         const { data, error } = await supabase.storage
             .from('notes-images')
             .upload(filePath, file, {
@@ -828,7 +818,6 @@ async function uploadImage(file) {
 
         if (error) throw error;
 
-        // Récupérer l'URL publique
         const { data: { publicUrl } } = supabase.storage
             .from('notes-images')
             .getPublicUrl(filePath);
@@ -856,13 +845,11 @@ function setupImageHandling() {
         const file = e.target.files[0];
         if (!file) return;
 
-        // Vérification du format
         if (!['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(file.type)) {
             alert('Format d\'image non supporté. Utilisez JPG, PNG, GIF ou WebP.');
             return;
         }
 
-        // Vérification de la taille (5MB max)
         if (file.size > 5 * 1024 * 1024) {
             alert('L\'image ne doit pas dépasser 5MB.');
             return;
@@ -875,10 +862,8 @@ function setupImageHandling() {
         document.body.appendChild(loadingIndicator);
 
         try {
-            // Upload
             const publicUrl = await uploadImage(file);
 
-            // Insertion dans l'éditeur
             if (publicUrl) {
                 insertImage(publicUrl);
                 await saveCurrent();
@@ -888,7 +873,6 @@ function setupImageHandling() {
             console.error('Erreur lors du chargement de l\'image:', error);
             showToast('Erreur lors de l\'upload de l\'image', 'error');
         } finally {
-            // Retirer l'indicateur
             loadingIndicator.remove();
             imageInput.value = '';
         }
@@ -905,6 +889,7 @@ function insertImage(src) {
     wrapper.className = 'image-wrapper';
     wrapper.contentEditable = 'false';
 
+    // Image elle-même
     const img = document.createElement('img');
     img.src = src;
     img.alt = 'Image insérée';
@@ -912,42 +897,44 @@ function insertImage(src) {
 
     wrapper.appendChild(img);
 
-    // Actions sur l'image
+    // Boutons d'action sur l'image
     wrapper.innerHTML += `
         <div class="image-actions">
             <button class="image-action-btn delete-img" title="Supprimer l'image">
                 <i class="fas fa-trash"></i>
             </button>
         </div>
+        <div class="resize-handle" title="Redimensionner (glisser)">
+            <i class="fas fa-grip-lines-vertical"></i>
+        </div>
     `;
 
     attachImageListeners(wrapper);
 
-    // Insérer le wrapper dans l'éditeur à l'emplacement du curseur
+    // Insérer le wrapper dans l'éditeur
     range.insertNode(wrapper);
     range.collapse(false);
 
-    // Sauvegarde automatique après insertion
+    // Sauvegarde
     saveCurrent();
 }
 
 function attachImageListeners(wrapper) {
+    // Bouton de suppression
     const deleteBtn = wrapper.querySelector('.delete-img');
+    const img = wrapper.querySelector('img');
+
     if (deleteBtn) {
         deleteBtn.addEventListener('click', async () => {
-            const img = wrapper.querySelector('img');
             if (img && img.src) {
                 try {
-                    // Récupérer le nom de fichier à partir de l'URL
                     const fileUrl = new URL(img.src);
                     const fileName = fileUrl.pathname.split('/').pop();
                     if (fileName) {
-                        // Supprimer du stockage
                         await supabase.storage
                             .from('notes-images')
                             .remove([`${currentUserId}/${fileName}`]);
                     }
-                    // Retirer du DOM
                     wrapper.remove();
                     saveCurrent();
                 } catch (error) {
@@ -958,8 +945,43 @@ function attachImageListeners(wrapper) {
         });
     }
 
-    // Permettre un redimensionnement simple (ex : Ctrl + clic)
-    const img = wrapper.querySelector('img');
+    // Redimensionnement simple (Drag & Drop)
+    const resizeHandle = wrapper.querySelector('.resize-handle');
+    if (resizeHandle && img) {
+        let isResizing = false;
+        let startX = 0;
+        let startWidth = 0;
+
+        const doDrag = (e) => {
+            if (!isResizing) return;
+            const dx = e.clientX - startX;
+            const newWidth = startWidth + dx;
+            if (newWidth > 50) { // On peut mettre un minimum
+                img.style.width = newWidth + 'px';
+            }
+        };
+
+        const stopDrag = () => {
+            if (isResizing) {
+                isResizing = false;
+                document.removeEventListener('mousemove', doDrag);
+                document.removeEventListener('mouseup', stopDrag);
+                // Sauvegarde de la nouvelle taille
+                saveCurrent();
+            }
+        };
+
+        resizeHandle.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            isResizing = true;
+            startX = e.clientX;
+            startWidth = img.offsetWidth;
+            document.addEventListener('mousemove', doDrag);
+            document.addEventListener('mouseup', stopDrag);
+        });
+    }
+
+    // Optionnel : clic Ctrl pour redimensionner en pourcentage
     if (img) {
         img.style.cursor = 'pointer';
         img.addEventListener('click', (e) => {
@@ -978,7 +1000,5 @@ function attachImageListeners(wrapper) {
  * 10) GESTION DES TOASTS (exemple)
  ****************************/
 function showToast(message, type = "info") {
-    // Implémentez ici votre système de notification/toast
-    // Par exemple : un petit DIV qui apparaît en haut à droite
     console.log(`[${type.toUpperCase()}] ${message}`);
 }

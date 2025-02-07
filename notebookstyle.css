@@ -58,7 +58,7 @@
 
 /****************************************************
     Reset & base
-  *****************************************************/
+*****************************************************/
 * {
     margin: 0;
     padding: 0;
@@ -77,7 +77,7 @@ body {
 
 /****************************************************
     Header
-  *****************************************************/
+*****************************************************/
 .header {
     background: var(--surface);
     border-bottom: 1px solid var(--border);
@@ -109,12 +109,12 @@ body {
 
 /****************************************************
     Main Layout
-  *****************************************************/
+*****************************************************/
 .main {
     flex: 1;
     display: flex;
     overflow: hidden;
-    /* pour éviter les scrolls multiples */
+    /* évite les scrolls multiples */
 }
 
 @media (max-width: 768px) {
@@ -131,7 +131,7 @@ body {
 
 /****************************************************
     Sidebar
-  *****************************************************/
+*****************************************************/
 .sidebar {
     width: 260px;
     background: var(--surface);
@@ -140,6 +140,7 @@ body {
     transition: background var(--transition-normal), color var(--transition-normal);
     padding: 1rem;
     overflow-y: auto;
+    /* Scroll si trop de notebooks */
 }
 
 .sidebar-header {
@@ -204,12 +205,12 @@ body {
 
 .notebook-actions .action-btn:hover {
     color: #e11d48;
-    /* Un rouge pour signaler la poubelle par ex. */
+    /* Rouge pour le hover */
 }
 
 /****************************************************
     Content area
-  *****************************************************/
+*****************************************************/
 .content-area {
     flex: 1;
     display: flex;
@@ -221,7 +222,7 @@ body {
 
 /****************************************************
     Hiérarchie (breadcrumb)
-  *****************************************************/
+*****************************************************/
 .hierarchy {
     display: flex;
     align-items: center;
@@ -245,13 +246,13 @@ body {
 
 /****************************************************
     Disposition 2 colonnes (notes/pages + éditeur)
-  *****************************************************/
+*****************************************************/
 .main-content-grid {
     display: grid;
     grid-template-columns: 300px 1fr;
     gap: 1rem;
     height: calc(100vh - 150px);
-    /* Ajuste selon la hauteur du header/footer */
+    /* Ajustez selon la hauteur header/footer */
     overflow: hidden;
 }
 
@@ -264,7 +265,7 @@ body {
 
 /****************************************************
     Panneaux (Notes, Pages)
-  *****************************************************/
+*****************************************************/
 .notes-panel,
 .pages-panel {
     background: var(--surface);
@@ -290,8 +291,42 @@ body {
 .panel-body {
     padding: 0.5rem;
     max-height: calc(100vh - 220px);
-    /* Ajuste selon la taille */
+    /* Contrôle la hauteur des panneaux, overflow auto */
     overflow-y: auto;
+}
+
+/* Pour affiner encore le scroll, on peut cibler #notesList et #pagesList directement */
+#notesList,
+#pagesList {
+    max-height: 250px;
+    /* Hauteur max affichée pour la liste */
+    overflow-y: auto;
+    margin-bottom: 1rem;
+    /* Optionnel: on peut enlever le border/padding
+       si on préfère garder ceux du panel-body */
+}
+
+/* Optionnel : style personnalisé de la scrollbar (Chrome/Edge/Safari) */
+#notesList::-webkit-scrollbar,
+#pagesList::-webkit-scrollbar {
+    width: 8px;
+}
+
+#notesList::-webkit-scrollbar-track,
+#pagesList::-webkit-scrollbar-track {
+    background: #f0f0f0;
+    border-radius: 4px;
+}
+
+#notesList::-webkit-scrollbar-thumb,
+#pagesList::-webkit-scrollbar-thumb {
+    background: #bbb;
+    border-radius: 4px;
+}
+
+#notesList::-webkit-scrollbar-thumb:hover,
+#pagesList::-webkit-scrollbar-thumb:hover {
+    background: #999;
 }
 
 .item-list {
@@ -320,7 +355,6 @@ body {
     align-items: center;
     gap: 0.5rem;
     min-width: 0;
-    /* Pour éviter le débordement du texte */
 }
 
 .item-list li .page-title {
@@ -337,42 +371,14 @@ body {
     border-color: var(--primary);
 }
 
-.item-list li.active {
-    background: var(--primary);
-    color: white;
-}
-
 .item-list li.active:hover {
-    background: var(--primary-dark);
+    background: var(--primary-hover);
 }
 
 .item-list li .actions {
     display: flex;
     gap: 0.4rem;
     margin-left: auto;
-}
-
-.item-list li:hover .action-btn,
-.item-list li.active .action-btn {
-    color: white;
-}
-
-.item-list li .actions {
-    display: flex;
-    gap: 0.4rem;
-}
-
-.item-list li.active {
-    background: var(--primary);
-    color: white;
-}
-
-.item-list li.active .action-btn {
-    color: white;
-}
-
-.item-list li.active:hover {
-    background: var(--primary-dark);
 }
 
 .action-btn {
@@ -391,8 +397,8 @@ body {
 }
 
 /****************************************************
-    Editeur
-  *****************************************************/
+    Éditeur
+*****************************************************/
 .editor-container {
     display: flex;
     flex-direction: column;
@@ -417,7 +423,6 @@ body {
     margin-bottom: 1rem;
     outline: none;
     min-height: 1.5rem;
-    /* Placeholder custom */
 }
 
 .editor-content {
@@ -478,7 +483,9 @@ body {
     color: white;
 }
 
-/* Style des images dans l'éditeur */
+/****************************************************
+    Images dans l'éditeur
+*****************************************************/
 .editor-content img {
     max-width: 100%;
     height: auto;
@@ -489,8 +496,11 @@ body {
 .image-wrapper {
     position: relative;
     display: inline-block;
+    margin: 1rem 0;
+    max-width: 100%;
 }
 
+/* Boutons d'action sur l'image (ex: poubelle) */
 .image-wrapper .image-actions {
     position: absolute;
     top: 0.5rem;
@@ -518,9 +528,33 @@ body {
     color: white;
 }
 
+/* Handle de redimensionnement (drag & drop) */
+.resize-handle {
+    width: 12px;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.1);
+    cursor: col-resize;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+.resize-handle i {
+    font-size: 12px;
+    color: #444;
+}
+
+.resize-handle:hover {
+    background: rgba(0, 0, 0, 0.2);
+}
+
 /****************************************************
     Empty state
-  *****************************************************/
+*****************************************************/
 .empty-state {
     position: absolute;
     top: 0;
@@ -535,7 +569,7 @@ body {
     justify-content: center;
     border-radius: var(--radius-md);
     pointer-events: none;
-    /* pour laisser l'éditeur en dessous non cliquable quand affiché */
+    /* l'éditeur en dessous est non cliquable quand affiché */
     opacity: 1;
     transition: opacity var(--transition-fast);
     text-align: center;
@@ -548,11 +582,9 @@ body {
     opacity: 0.7;
 }
 
-/* On cachera ou affichera .empty-state via JS en ajustant son opacity ou display */
-
 /****************************************************
     Boutons
-  *****************************************************/
+*****************************************************/
 .btn {
     background: var(--primary);
     color: #fff;
@@ -575,7 +607,7 @@ body {
 
 /****************************************************
     Theme toggle
-  *****************************************************/
+*****************************************************/
 .theme-toggle {
     background: none;
     border: none;
@@ -597,7 +629,7 @@ body {
 
 /****************************************************
     Footer
-  *****************************************************/
+*****************************************************/
 .footer {
     background: var(--surface);
     border-top: 1px solid var(--border);
@@ -610,7 +642,7 @@ body {
 
 /****************************************************
     Loading Indicator
-  *****************************************************/
+*****************************************************/
 .loading-indicator {
     position: fixed;
     top: 50%;
