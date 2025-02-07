@@ -262,13 +262,12 @@ async function loadNotes(notebookId) {
             .from("notes")
             .select("*")
             .eq("notebook_id", notebookId)
-            .eq("user_id", currentUserId) // Ajouter ce filtre
+            .eq("user_id", currentUserId)
             .order("last_modified", { ascending: false });
+
         if (error) throw error;
 
-        // Stocker les notes chargées
         currentNotes = data || [];
-
         const notesListDiv = document.getElementById("notesList");
         notesListDiv.innerHTML = "";
 
@@ -289,8 +288,11 @@ async function loadNotes(notebookId) {
         currentNotes.forEach((note) => {
             const li = document.createElement("li");
             li.className = note.id === selectedNoteId ? 'active' : '';
+            li.dataset.noteId = note.id; // Ajout d'un data attribute pour l'ID
             li.innerHTML = `
-                <span>${note.title || "(Sans titre)"}</span>
+                <div class="note-content">
+                    <span class="note-title">${note.title || "(Sans titre)"}</span>
+                </div>
                 <div class="actions">
                     <button class="action-btn delete-btn" title="Supprimer">
                         <i class="fas fa-trash"></i>
@@ -298,19 +300,46 @@ async function loadNotes(notebookId) {
                 </div>
             `;
 
-            li.querySelector("span").onclick = () => selectNote(note.id);
-            li.querySelector(".delete-btn").onclick = async (e) => {
+            // Gestion du clic sur toute la note
+            li.addEventListener('click', (e) => {
+                // Ne pas déclencher si on clique sur le bouton delete
+                if (!e.target.closest('.delete-btn')) {
+                    selectNote(note.id);
+                }
+            });
+
+            // Gestion séparée du bouton delete
+            li.querySelector(".delete-btn").addEventListener('click', async (e) => {
                 e.stopPropagation();
                 if (confirm("Voulez-vous vraiment supprimer cette note ?")) {
                     await deleteNote(note.id);
                 }
-            };
+            });
 
             ul.appendChild(li);
         });
     } catch (err) {
         console.error("Erreur loadNotes:", err.message);
     }
+}
+
+function selectNote(noteId) {
+    const note = currentNotes.find(n => n.id === noteId);
+    if (!note) return;
+
+    // Mise à jour de la sélection visuelle
+    document.querySelectorAll('#notesList li').forEach(li => {
+        li.classList.toggle('active', li.dataset.noteId === noteId);
+    });
+
+    selectedNoteId = noteId;
+    selectedPageId = null;
+    editMode = "note";
+
+    showInEditor(note.title, note.content);
+    loadPages(noteId);
+    updateHierarchyPath();
+    showEmptyState(false);
 }
 
 async function createNote() {
@@ -343,29 +372,6 @@ async function createNote() {
     }
 }
 
-function selectNote(noteId) {
-    const note = currentNotes.find(n => n.id === noteId);
-    if (!note) return;
-
-    // Mettre à jour la sélection visuelle
-    document.querySelectorAll('#notesList li').forEach(li => {
-        li.classList.toggle('active', li.querySelector('span').textContent === (note.title || "(Sans titre)"));
-    });
-
-    selectedNoteId = note.id;
-    selectedPageId = null;
-    editMode = "note";
-
-    // Afficher le titre et contenu dans l'éditeur
-    showInEditor(note.title, note.content);
-
-    // Charger les pages associées
-    loadPages(note.id);
-
-    updateHierarchyPath();
-    showEmptyState(false);
-}
-
 async function deleteNote(noteId) {
     try {
         const { error } = await supabase
@@ -389,6 +395,7 @@ async function deleteNote(noteId) {
 /****************************
  * 3) GESTION DES PAGES
  ****************************/
+// Modifier la fonction loadPages pour améliorer la gestion des clics et l'état actif
 async function loadPages(noteId) {
     try {
         if (!noteId) {
@@ -434,8 +441,11 @@ async function loadPages(noteId) {
         data.forEach((page) => {
             const li = document.createElement("li");
             li.className = page.id === selectedPageId ? 'active' : '';
+            li.dataset.pageId = page.id;
             li.innerHTML = `
-                <span>${page.title || "(Sans titre)"}</span>
+                <div class="page-content">
+                    <span class="page-title">${page.title || "(Sans titre)"}</span>
+                </div>
                 <div class="actions">
                     <button class="action-btn delete-btn" title="Supprimer">
                         <i class="fas fa-trash"></i>
@@ -443,13 +453,21 @@ async function loadPages(noteId) {
                 </div>
             `;
 
-            li.querySelector("span").onclick = () => selectPage(page);
-            li.querySelector(".delete-btn").onclick = async (e) => {
+            // Gestion du clic sur toute la page
+            li.addEventListener('click', (e) => {
+                // Ne pas déclencher si on clique sur le bouton delete
+                if (!e.target.closest('.delete-btn')) {
+                    selectPage(page);
+                }
+            });
+
+            // Gestion séparée du bouton delete
+            li.querySelector(".delete-btn").addEventListener('click', async (e) => {
                 e.stopPropagation();
                 if (confirm("Voulez-vous vraiment supprimer cette page ?")) {
                     await deletePage(page.id);
                 }
-            };
+            });
 
             ul.appendChild(li);
         });
@@ -458,6 +476,21 @@ async function loadPages(noteId) {
     } catch (err) {
         console.error("Erreur loadPages:", err.message);
     }
+}
+
+// Modifier la fonction selectPage pour mettre à jour la sélection visuelle
+function selectPage(page) {
+    selectedPageId = page.id;
+    editMode = "page";
+
+    // Mise à jour de la sélection visuelle
+    document.querySelectorAll('#pagesList li').forEach(li => {
+        li.classList.toggle('active', li.dataset.pageId === page.id);
+    });
+
+    showInEditor(page.title, page.content);
+    updateHierarchyPath();
+    showEmptyState(false);
 }
 
 async function createPage() {
@@ -488,14 +521,6 @@ async function createPage() {
     } catch (err) {
         console.error("Erreur createPage:", err.message);
     }
-}
-
-function selectPage(page) {
-    selectedPageId = page.id;
-    editMode = "page";
-    showInEditor(page.title, page.content);
-    updateHierarchyPath();
-    showEmptyState(false);
 }
 
 async function deletePage(pageId) {
