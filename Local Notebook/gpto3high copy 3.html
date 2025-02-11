@@ -728,6 +728,57 @@
             max-height: calc(100vh - 220px);
             overflow-y: auto;
             flex: 1;
+            /* Styles existants */
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) transparent;
+        }
+
+        /* Style moderne pour WebKit (Chrome, Safari, Edge) */
+        .panel-body::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .panel-body::-webkit-scrollbar-track {
+            background: transparent;
+            border-radius: 4px;
+        }
+
+        .panel-body::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+        }
+
+        .panel-body::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+            border: 2px solid transparent;
+            background-clip: padding-box;
+        }
+
+        /* État actif de la scrollbar */
+        .panel-body::-webkit-scrollbar-thumb:active {
+            background: var(--primary-hover);
+        }
+
+        /* Coins de la scrollbar */
+        .panel-body::-webkit-scrollbar-corner {
+            background: transparent;
+        }
+
+        /* Animation douce au survol */
+        .panel-body::-webkit-scrollbar-thumb {
+            transition: background-color 0.2s ease;
+        }
+
+        /* Style spécifique pour le mode sombre */
+        [data-theme="dark"] .panel-body::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        [data-theme="dark"] .panel-body::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
         }
 
         .item-list {
