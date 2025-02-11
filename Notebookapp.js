@@ -105,6 +105,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         editorContent.addEventListener('keyup', updateFormatButtonStates);
         editorContent.addEventListener('mouseup', updateFormatButtonStates);
     }
+
+    setupFormatButtons();
 });
 
 /****************************
@@ -829,6 +831,26 @@ function updateFormatButtonStates() {
         const format = btn.dataset.format;
         if (['bold', 'italic', 'underline'].includes(format)) {
             btn.classList.toggle('active', document.queryCommandState(format));
+        }
+    });
+}
+
+function setupFormatButtons() {
+    document.querySelectorAll('.format-btn').forEach(btn => {
+        const format = btn.dataset.format;
+        if (format === 'foreColor') {
+            const colorPicker = btn.querySelector('.color-picker');
+            if (colorPicker) {
+                colorPicker.addEventListener('input', (e) => {
+                    applyFormat('foreColor', e.target.value);
+                });
+                colorPicker.addEventListener('change', (e) => {
+                    applyFormat('foreColor', e.target.value);
+                    saveCurrent();
+                });
+            }
+        } else if (format !== 'insertImage') {
+            btn.addEventListener('click', () => applyFormat(format));
         }
     });
 }

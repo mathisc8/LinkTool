@@ -430,6 +430,9 @@ body {
     list-style: none;
     margin: 0;
     padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
 .item-list li {
@@ -444,6 +447,28 @@ body {
     border: 1px solid var(--border);
     position: relative;
     transition: all var(--transition-fast);
+    background: var(--surface);
+    border-radius: var(--radius-md);
+    padding: 0.75rem;
+    gap: 0.75rem;
+    transition: all 0.2s ease;
+}
+
+.item-list li:hover,
+.item-list li.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.item-list li:hover {
+    transform: translateX(4px);
+    background: var(--background);
+    border-color: var(--primary);
+}
+
+.item-list li.active:hover {
+    background: var(--primary-hover);
 }
 
 .item-list li .page-content {
@@ -461,21 +486,35 @@ body {
     white-space: nowrap;
 }
 
-.item-list li:hover,
-.item-list li.active {
-    background: var(--primary);
-    color: white;
-    border-color: var(--primary);
-}
-
-.item-list li.active:hover {
-    background: var(--primary-hover);
-}
-
 .item-list li .actions {
     display: flex;
     gap: 0.4rem;
     margin-left: auto;
+}
+
+.item-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.item-title {
+    font-weight: 500;
+    color: inherit;
+}
+
+.item-meta {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.item-meta i {
+    font-size: 0.8em;
 }
 
 .action-btn {
@@ -491,6 +530,67 @@ body {
 .action-btn:hover {
     color: #e11d48;
     background: rgba(239, 68, 68, 0.1);
+}
+
+/* Styles pour la recherche */
+.search-controls {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    background: var(--background);
+    border-radius: var(--radius-md);
+}
+
+.search-type-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.search-type-btn:hover {
+    color: var(--text-primary);
+    background: var(--surface);
+}
+
+.search-type-btn.active {
+    background: var(--primary);
+    color: white;
+}
+
+.search-count {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+/* Style pour les résultats de recherche mis en surbrillance */
+mark {
+    background: var(--primary);
+    color: white;
+    padding: 0.1em 0.3em;
+    border-radius: 0.2em;
+}
+
+/* Animation d'apparition pour les résultats */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.search-result {
+    animation: fadeIn 0.3s ease forwards;
 }
 
 /****************************************************
@@ -921,4 +1021,93 @@ body {
     opacity: 1;
     visibility: visible;
     transform: translateX(-50%) translateY(-5px);
+}
+
+/****************************************************
+    Styles de recherche
+*****************************************************/
+.search-result {
+    animation: slideIn 0.3s ease-out;
+}
+
+.search-count {
+    background: var(--surface);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin: 0.5rem 0;
+    display: none;
+}
+
+.search-controls {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    margin-top: 0.5rem;
+}
+
+.search-type-btn {
+    padding: 0.4rem 0.8rem;
+    border: none;
+    background: var(--background);
+    color: var(--text-secondary);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.search-type-btn i {
+    font-size: 0.9em;
+}
+
+.search-type-btn:hover {
+    background: var(--primary-50);
+    color: var(--primary);
+}
+
+.search-type-btn.active {
+    background: var(--primary);
+    color: white;
+}
+
+mark {
+    background: var(--primary-100);
+    color: var(--primary-900);
+    padding: 0.1em 0.3em;
+    border-radius: 0.2em;
+    font-weight: 500;
+}
+
+[data-theme="dark"] mark {
+    background: var(--primary-900);
+    color: var(--primary-100);
+}
+
+.note-preview,
+.page-preview {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

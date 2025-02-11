@@ -80,7 +80,25 @@
         <div class="header__center">
             <div class="header-search">
                 <i class="fas fa-search"></i>
-                <input type="text" placeholder="Rechercher dans les notes...">
+                <input type="text" placeholder="Rechercher...">
+                <div class="search-controls">
+                    <button class="search-type-btn active" data-search-type="all">
+                        <i class="fas fa-globe"></i>
+                        Tout
+                    </button>
+                    <button class="search-type-btn" data-search-type="notebooks">
+                        <i class="fas fa-book"></i>
+                        Notebooks
+                    </button>
+                    <button class="search-type-btn" data-search-type="notes">
+                        <i class="fas fa-file-alt"></i>
+                        Notes
+                    </button>
+                    <button class="search-type-btn" data-search-type="pages">
+                        <i class="fas fa-file"></i>
+                        Pages
+                    </button>
+                </div>
             </div>
         </div>
         <div class="header__right">
@@ -221,13 +239,14 @@
 
     <!-- Footer -->
     <footer class="footer">
-        <p>2025 - Mon super clone OneNote/Notion - Tous droits réservés</p>
+        <p>2025 - Notes Pro - Tous droits réservés</p>
     </footer>
 
     <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@latest/dist/umd/supabase.min.js"></script>
     <!-- Notre script principal -->
     <script src="Notebookapp.js"></script>
+    <script src="searchHandlers.js"></script>
 </body>
 
 </html>
