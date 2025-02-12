@@ -1060,26 +1060,46 @@ document.addEventListener("DOMContentLoaded", async () => {
   async function startFolderRename(folderId) {
     const folder = folders.find(f => f.id === folderId);
     if (!folder) return;
+
     const folderBtn = document.querySelector(`[data-folder="${folderId}"]`);
     if (!folderBtn) return;
+
     const oldName = folder.name;
     const nameSpan = folderBtn.querySelector('span');
     if (!nameSpan) return;
+
     const input = document.createElement('input');
     input.type = 'text';
     input.className = 'folder-rename-input';
     input.value = folder.name;
     input.maxLength = 30;
+
+    // Masquer l'élément d'affichage et insérer l'input à la place
     nameSpan.style.display = 'none';
     nameSpan.parentNode.insertBefore(input, nameSpan);
+
     input.focus();
     input.select();
+
+    // Ajout d'un écouteur pour la touche espace qui empêche la propagation
+    input.addEventListener('keydown', (e) => {
+      if (e.key === ' ') {
+        e.stopPropagation();
+        // On ne fait pas e.preventDefault() afin de permettre l'insertion d'un espace dans le champ
+      }
+    });
+
     const finishRename = async (save) => {
-      if (save && input.value.trim() && input.value !== oldName) {
-        const newName = input.value.trim();
+      if (save && input.value && input.value !== oldName) {
+        const newName = input.value;
         try {
-          const { error } = await supabase.from('folders').update({ name: newName }).eq('id', folderId).eq('user_id', currentUserId);
+          const { error } = await supabase
+            .from('folders')
+            .update({ name: newName })
+            .eq('id', folderId)
+            .eq('user_id', currentUserId);
           if (error) throw error;
+
           folder.name = newName;
           renderFolders();
           showToast('Folder renamed successfully');
@@ -1093,12 +1113,18 @@ document.addEventListener("DOMContentLoaded", async () => {
       nameSpan.style.display = '';
       input.remove();
     };
+
+    // Le blur commit le changement quand l'utilisateur clique en dehors de l'input
     input.addEventListener('blur', () => finishRename(true));
+
+    // Seules les touches Enter et Escape déclenchent la validation ou l'annulation
     input.addEventListener('keyup', e => {
       if (e.key === 'Enter') finishRename(true);
       if (e.key === 'Escape') finishRename(false);
     });
   }
+
+
 
   document.addEventListener("click", e => {
     if (!e.target.closest(".folder-context-menu")) removeContextMenu();

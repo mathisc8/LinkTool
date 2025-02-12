@@ -174,9 +174,9 @@ async function loadNotebooks() {
                 <span class="notebook-name">${notebook.name}</span>
               </div>
               <div class="notebook-actions">
-                <!-- Favori -->
-                <button class="action-btn" title="Mettre en Favori">
-                  <i class="fas fa-star"></i>
+                <!-- Changer fas en far pour avoir une étoile vide par défaut -->
+                <button class="action-btn favorite-btn" title="Mettre en Favori">
+                  <i class="far fa-star"></i>
                 </button>
                 <button class="action-btn edit-btn" title="Renommer">
                   <i class="fas fa-edit"></i>
@@ -202,7 +202,6 @@ async function loadNotebooks() {
                     e.stopPropagation();
                     toggleFavoriteNotebook(notebook);
                 });
-
             // Bouton "edit" (renommer)
             notebookEl
                 .querySelector(".edit-btn")
@@ -355,9 +354,9 @@ async function loadNotes(notebookId) {
               <span class="note-title">${note.title || "(Sans titre)"}</span>
             </div>
             <div class="actions">
-              <!-- Favori sur la Note -->
-              <button class="action-btn" title="Favori" onclick="toggleFavoriteNote(event, '${note.id}')">
-                <i class="fas fa-star"></i>
+              <!-- Changer fas en far pour avoir une étoile vide par défaut -->
+              <button class="action-btn favorite-btn" title="Favori" onclick="toggleFavoriteNote(event, '${note.id}')">
+                <i class="far fa-star"></i>
               </button>
               <button class="action-btn delete-btn" title="Supprimer">
                 <i class="fas fa-trash"></i>
@@ -1100,6 +1099,7 @@ function showToast(message, type = "info") {
     // Vous pourriez ajouter un vrai toast visuel ici
 }
 
+
 /****************************
  * 11) GESTION DE LA RECHERCHE
  ****************************/
@@ -1277,8 +1277,8 @@ function updateNotebooksList(notebooks, term) {
               <span class="notebook-name">${highlightTerm(nb.name, term)}</span>
             </div>
             <div class="notebook-actions">
-              <button class="action-btn" title="Mettre en Favori">
-                <i class="fas fa-star"></i>
+              <button class="action-btn favorite-btn" title="Mettre en Favori">
+                <i class="far fa-star"></i>
               </button>
             </div>
           </div>
@@ -1321,8 +1321,8 @@ function updateNotesList(notes, term) {
             <span class="note-title">${highlightTerm(note.title || "(Sans titre)", term)}</span>
           </div>
           <div class="actions">
-            <button class="action-btn" title="Favori">
-              <i class="fas fa-star"></i>
+            <button class="action-btn favorite-btn" title="Favori">
+              <i class="far fa-star"></i>
             </button>
           </div>
         `;
@@ -1380,78 +1380,226 @@ function resetSearch() {
 /****************************
  * 12) FAVORIS (notebooks / notes)
  ****************************/
-function loadFavorites() {
-    const favData = localStorage.getItem("favorites");
-    favorites = favData ? JSON.parse(favData) : [];
-    refreshFavoritesUI();
+// Remplacer l'ancienne gestion des favoris basée sur localStorage par Supabase
+async function loadFavorites() {
+    try {
+        // Charger tous les notebooks et notes favoris
+        const [nbRes, ntRes] = await Promise.all([
+            supabase
+                .from('notebooks')
+                .select('id, name')
+                .eq('user_id', currentUserId)
+                .eq('favorite', true),
+            supabase
+                .from('notes')
+                .select('id, title, notebook_id')
+                .eq('user_id', currentUserId)
+                .eq('favorite', true)
+        ]);
+
+        favorites = [
+            ...(nbRes.data || []).map(nb => ({
+                id: nb.id,
+                title: nb.name,
+                type: 'notebook'
+            })),
+            ...(ntRes.data || []).map(note => ({
+                id: note.id,
+                title: note.title,
+                type: 'note',
+                notebook_id: note.notebook_id
+            }))
+        ];
+
+        refreshFavoritesUI();
+        updateFavoriteIcons();
+    } catch (err) {
+        console.error('Erreur loadFavorites:', err);
+        showToast('Erreur lors du chargement des favoris', 'error');
+    }
 }
-function saveFavorites() {
-    localStorage.setItem("favorites", JSON.stringify(favorites));
-}
+
+// Déplacer la fonction refreshFavoritesUI avant son utilisation
 function refreshFavoritesUI() {
     const favList = document.getElementById("favoritesList");
     if (!favList) return;
     favList.innerHTML = "";
+
     if (!favorites.length) {
         const li = document.createElement("li");
-        li.textContent = "Aucun favori";
-        li.style.color = "var(--text-secondary)";
+        li.innerHTML = `
+            <div class="empty-favorite">
+                <i class="far fa-star"></i>
+                <p>Aucun favori</p>
+            </div>
+        `;
         favList.appendChild(li);
         return;
     }
+
     favorites.forEach((fav) => {
         const li = document.createElement("li");
-        li.textContent = fav.title;
-        li.addEventListener("click", () => {
+        li.className = 'favorite-item';
+        li.innerHTML = `
+            <div class="favorite-content">
+                <i class="fas ${fav.type === 'notebook' ? 'fa-book' : 'fa-file-alt'}"></i>
+                <span class="favorite-title">${fav.title || '(Sans titre)'}</span>
+            </div>
+            <button class="action-btn remove-favorite" title="Retirer des favoris">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+
+        // Clic sur l'item pour naviguer
+        li.querySelector('.favorite-content').addEventListener('click', () => {
             if (fav.type === "notebook") {
                 selectNotebook(fav.id);
             } else if (fav.type === "note") {
                 selectNotebook(fav.notebook_id);
-                setTimeout(() => {
-                    selectNote(fav.id);
-                }, 300);
+                setTimeout(() => selectNote(fav.id), 300);
             }
         });
+
+        // Clic sur le bouton de suppression
+        li.querySelector('.remove-favorite').addEventListener('click', async (e) => {
+            e.stopPropagation();
+            if (fav.type === 'notebook') {
+                await toggleFavoriteNotebook({ id: fav.id, name: fav.title });
+            } else {
+                await toggleFavoriteNote({ target: e.target }, fav.id);
+            }
+        });
+
         favList.appendChild(li);
     });
 }
-function toggleFavoriteNotebook(notebook) {
-    const existing = favorites.find(
-        (f) => f.id === notebook.id && f.type === "notebook"
-    );
-    if (existing) {
-        favorites = favorites.filter((f) => f !== existing);
-        showToast("Notebook retiré des favoris", "info");
-    } else {
-        favorites.push({
-            id: notebook.id,
-            title: notebook.name,
-            type: "notebook",
-        });
-        showToast("Notebook ajouté aux favoris", "success");
+
+// Ensuite, les fonctions qui l'utilisent
+async function toggleFavoriteNotebook(notebook) {
+    try {
+        const existing = favorites.find(f => f.id === notebook.id && f.type === 'notebook');
+        const newFavoriteState = !existing;
+
+        // Mettre à jour dans Supabase
+        const { error } = await supabase
+            .from('notebooks')
+            .update({ favorite: newFavoriteState })
+            .eq('id', notebook.id)
+            .eq('user_id', currentUserId);
+
+        if (error) throw error;
+
+        // Mettre à jour l'icône
+        const starBtn = document.querySelector(`[data-notebook-id="${notebook.id}"] .favorite-btn i`);
+        if (starBtn) {
+            starBtn.className = newFavoriteState ? 'fas fa-star' : 'far fa-star';
+        }
+
+        // Mettre à jour l'état local
+        if (newFavoriteState) {
+            favorites.push({
+                id: notebook.id,
+                title: notebook.name,
+                type: 'notebook'
+            });
+            showToast('Notebook ajouté aux favoris', 'success');
+        } else {
+            favorites = favorites.filter(f => !(f.id === notebook.id && f.type === 'notebook'));
+            showToast('Notebook retiré des favoris', 'info');
+        }
+
+        refreshFavoritesUI();
+    } catch (err) {
+        console.error('Erreur toggleFavoriteNotebook:', err);
+        showToast('Erreur lors de la mise à jour du favori', 'error');
     }
-    saveFavorites();
-    refreshFavoritesUI();
 }
-function toggleFavoriteNote(e, noteId) {
+
+async function toggleFavoriteNote(e, noteId) {
     e.stopPropagation();
-    const note = currentNotes.find((n) => n.id === noteId);
-    if (!note) return;
-    const existing = favorites.find((f) => f.id === note.id && f.type === "note");
-    if (existing) {
-        favorites = favorites.filter((f) => f !== existing);
-        showToast("Note retirée des favoris", "info");
-    } else {
-        favorites.push({
-            id: note.id,
-            title: note.title,
-            type: "note",
-            notebook_id: note.notebook_id,
-        });
-        showToast("Note ajoutée aux favoris", "success");
+    try {
+        const note = currentNotes.find(n => n.id === noteId);
+        if (!note) return;
+
+        const existing = favorites.find(f => f.id === note.id && f.type === 'note');
+        const newFavoriteState = !existing;
+
+        // Mettre à jour dans Supabase
+        const { error } = await supabase
+            .from('notes')
+            .update({ favorite: newFavoriteState })
+            .eq('id', noteId)
+            .eq('user_id', currentUserId);
+
+        if (error) throw error;
+
+        // Mettre à jour l'icône
+        const starBtn = e.target.closest('.favorite-btn').querySelector('i');
+        if (starBtn) {
+            starBtn.className = newFavoriteState ? 'fas fa-star' : 'far fa-star';
+        }
+
+        // Mettre à jour l'état local
+        if (newFavoriteState) {
+            favorites.push({
+                id: note.id,
+                title: note.title,
+                type: 'note',
+                notebook_id: note.notebook_id
+            });
+            showToast('Note ajoutée aux favoris', 'success');
+        } else {
+            favorites = favorites.filter(f => !(f.id === note.id && f.type === 'note'));
+            showToast('Note retirée des favoris', 'info');
+        }
+
+        refreshFavoritesUI();
+    } catch (err) {
+        console.error('Erreur toggleFavoriteNote:', err);
+        showToast('Erreur lors de la mise à jour du favori', 'error');
     }
-    saveFavorites();
-    refreshFavoritesUI();
+}
+
+// Modifier updateFavoriteIcons pour utiliser les données de Supabase
+async function updateFavoriteIcons() {
+    try {
+        // Récupérer tous les éléments favoris
+        const [nbRes, ntRes] = await Promise.all([
+            supabase
+                .from('notebooks')
+                .select('id')
+                .eq('user_id', currentUserId)
+                .eq('favorite', true),
+            supabase
+                .from('notes')
+                .select('id')
+                .eq('user_id', currentUserId)
+                .eq('favorite', true)
+        ]);
+
+        // D'abord, mettre toutes les étoiles en "vide"
+        document.querySelectorAll('.favorite-btn i').forEach(star => {
+            star.className = 'far fa-star';
+        });
+
+        // Mettre à jour les icônes des notebooks favoris
+        (nbRes.data || []).forEach(nb => {
+            const starBtn = document.querySelector(`[data-notebook-id="${nb.id}"] .favorite-btn i`);
+            if (starBtn) {
+                starBtn.className = 'fas fa-star';
+            }
+        });
+
+        // Mettre à jour les icônes des notes favorites
+        (ntRes.data || []).forEach(note => {
+            const starBtn = document.querySelector(`[data-note-id="${note.id}"] .favorite-btn i`);
+            if (starBtn) {
+                starBtn.className = 'fas fa-star';
+            }
+        });
+    } catch (err) {
+        console.error('Erreur updateFavoriteIcons:', err);
+    }
 }
 
 /****************************
@@ -1519,6 +1667,7 @@ async function saveVersion(type, itemId, title, content) {
     }
 }
 
+// Modifier la fonction loadHistory pour ajouter le bouton de prévisualisation
 async function loadHistory() {
     // Charge l'historique pour la note ou la page sélectionnée
     const historyList = document.getElementById("historyList");
@@ -1557,27 +1706,69 @@ async function loadHistory() {
     data.forEach((version) => {
         const li = document.createElement("li");
         li.innerHTML = `
-          <div>
-            <span>[${new Date(version.date).toLocaleString()}] ${version.title || "(Sans titre)"}</span>
-            <!-- Bouton Restaurer la version -->
-            <button class="restore-btn" data-version-id="${version.id}">Restaurer</button>
-          </div>
+            <div class="version-item">
+                <div class="version-info">
+                    <span class="version-date">[${new Date(version.date).toLocaleString()}]</span>
+                    <span class="version-title">${version.title || "(Sans titre)"}</span>
+                </div>
+                <div class="version-actions">
+                    <button class="preview-btn" title="Prévisualiser">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="restore-btn" data-version-id="${version.id}">
+                        <i class="fas fa-history"></i> Restaurer
+                    </button>
+                </div>
+            </div>
         `;
-        // Cliquez sur la zone hors bouton => preview ou info
-        li.addEventListener("click", (ev) => {
-            if (!ev.target.matches(".restore-btn")) {
-                alert(
-                    "Contenu de cette version:\n\n" + (version.content || "(vide)")
-                );
-            }
+
+        // Bouton "Prévisualiser"
+        li.querySelector(".preview-btn").addEventListener("click", (e) => {
+            e.stopPropagation();
+            previewVersion(version);
         });
+
         // Bouton "Restaurer"
         li.querySelector(".restore-btn").addEventListener("click", (e) => {
             e.stopPropagation();
-            restoreVersion(version);
+            if (confirm('Voulez-vous vraiment restaurer cette version ?')) {
+                restoreVersion(version);
+            }
         });
+
         historyList.appendChild(li);
     });
+}
+
+// Ajouter la nouvelle fonction de prévisualisation
+function previewVersion(version) {
+    // Créer une modale de prévisualisation
+    const modal = document.createElement('div');
+    modal.className = 'preview-modal';
+    modal.innerHTML = `
+        <div class="preview-content">
+            <div class="preview-header">
+                <h3>Prévisualisation de la version</h3>
+                <button class="close-btn"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="preview-body">
+                <h4>${version.title || "(Sans titre)"}</h4>
+                <div class="preview-text">${version.content || "(Contenu vide)"}</div>
+            </div>
+        </div>
+    `;
+
+    // Gérer la fermeture
+    modal.querySelector('.close-btn').addEventListener('click', () => {
+        modal.remove();
+    });
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    });
+
+    document.body.appendChild(modal);
 }
 
 /**
