@@ -183,8 +183,9 @@
                             <button class="format-btn" data-format="insertOrderedList" data-tooltip="Liste numérotée">
                                 <i class="fas fa-list-ol"></i>
                             </button>
-                            <button class="format-btn" data-format="insertCheckList" data-tooltip="Liste de tâches">
-                                <i class="fas fa-tasks"></i>
+                            <!-- Ajouter ce nouveau bouton -->
+                            <button class="format-btn" data-format="insertCheckbox" data-tooltip="Liste à cocher">
+                                <i class="fas fa-check-square"></i>
                             </button>
                         </div>
 
@@ -223,6 +224,15 @@
                         <div class="format-group">
                             <button class="format-btn" id="exportPdfBtn" data-tooltip="Exporter en PDF">
                                 <i class="fas fa-file-export"></i>
+                            </button>
+                        </div>
+
+                        <div class="format-group">
+                            <!-- Ajouter après les autres boutons -->
+                            <button class="format-btn" data-format="insertTOC"
+                                data-tooltip="Générer table des matières">
+                                <i class="fas fa-list-ol"></i>
+                                <span>TOC</span>
                             </button>
                         </div>
                     </div>

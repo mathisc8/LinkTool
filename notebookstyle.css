@@ -414,6 +414,7 @@ body {
     align-items: center;
     gap: 0.5rem;
     margin-bottom: 0.5rem;
+    margin: 0;
 }
 
 .sidebar-title i {
@@ -1424,4 +1425,212 @@ mark,
 .restore-btn:hover {
     background: var(--primary);
     color: white;
+}
+
+/* Styles pour les checkbox */
+.checkbox-list {
+    list-style: none;
+    padding-left: 0;
+    margin: 1rem 0;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: start;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    padding: 0.25rem 0;
+}
+
+.checkbox-item input[type="checkbox"] {
+    margin-top: 0.25rem;
+    cursor: pointer;
+}
+
+.checkbox-item span {
+    flex: 1;
+    min-height: 1.5em;
+    padding: 0.1rem 0;
+}
+
+.checkbox-item input[type="checkbox"]:checked+span {
+    text-decoration: line-through;
+    color: var(--text-secondary);
+}
+
+/* Styles pour la table des matières */
+.toc-container {
+    background: var(--background);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    margin: 1rem 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.toc-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.5rem;
+}
+
+.toc-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.toc-item {
+    margin: 0.25rem 0;
+}
+
+.toc-link {
+    color: var(--text-primary);
+    text-decoration: none;
+    display: block;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.toc-link:hover {
+    background: var(--primary);
+    color: white;
+}
+
+.toc-item[data-level="h1"] {
+    padding-left: 0;
+}
+
+.toc-item[data-level="h2"] {
+    padding-left: 1.5rem;
+}
+
+.toc-item[data-level="h3"] {
+    padding-left: 3rem;
+}
+
+/* Styles pour le tooltip de prévisualisation de la TOC */
+.toc-preview-tooltip {
+    position: absolute;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    width: 300px;
+    max-height: 200px;
+    overflow-y: auto;
+    /* Permettre le défilement */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    z-index: 1000;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    cursor: default;
+    /* Curseur normal pour le scroll */
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary) transparent;
+}
+
+/* Ajouter des styles spécifiques pour la scrollbar du tooltip */
+.toc-preview-tooltip::-webkit-scrollbar {
+    width: 6px;
+}
+
+.toc-preview-tooltip::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.toc-preview-tooltip::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 3px;
+}
+
+.toc-preview-tooltip::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-hover);
+}
+
+/* Supprimer le dégradé qui masquait le contenu */
+.toc-preview-tooltip::before {
+    display: none;
+}
+
+/* Nouveau style pour le contenu du tooltip */
+.toc-preview-content {
+    padding: 1rem;
+}
+
+.toc-preview-tooltip.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.toc-preview-tooltip::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background: linear-gradient(transparent, var(--surface));
+    pointer-events: none;
+}
+
+.toc-link:hover .toc-preview-tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Amélioration des styles pour les checkboxes */
+.checkbox-list {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+}
+
+.checkbox-item {
+    margin-bottom: 0.5rem;
+}
+
+.checkbox-wrapper {
+    display: flex;
+    align-items: start;
+    gap: 0.5rem;
+    padding: 0.25rem;
+    border-radius: var(--radius-sm);
+    transition: background 0.2s ease;
+}
+
+.checkbox-wrapper:hover {
+    background: var(--background);
+}
+
+.task-checkbox {
+    margin-top: 0.25rem;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.checkbox-content {
+    flex: 1;
+    padding: 0.1rem 0;
+    min-height: 1.5em;
+    transition: all 0.2s ease;
+}
+
+.checkbox-content.completed {
+    text-decoration: line-through;
+    color: var(--text-secondary);
+    font-style: italic;
 }

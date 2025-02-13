@@ -594,12 +594,13 @@ function showInEditor(title, content) {
                 ALLOWED_TAGS: [
                     "div", "br", "p", "strong", "em", "u", "h1", "h2", "h3",
                     "ul", "ol", "li", "img", "span", "blockquote", "code", "pre",
-                    "table", "tr", "td", "th", "thead", "tbody"
+                    "table", "tr", "td", "th", "thead", "tbody", "input"
                 ],
-                ALLOWED_ATTR: ["src", "alt", "style", "class", "data-*", "border"],
+                ALLOWED_ATTR: ["src", "alt", "style", "class", "data-*", "border", "type", "checked"],
             });
             editorContent.innerHTML = sanitizedContent;
-            // Réattacher les listeners aux images (pour le resize, etc.)
+
+            // Réattacher les listeners
             editorContent.querySelectorAll(".image-wrapper").forEach((wrapper) => {
                 attachImageListeners(wrapper);
             });
@@ -615,6 +616,18 @@ function showInEditor(title, content) {
     }
     updateWordCount();
     updateScrollProgress();
+
+    // Restaurer l'état des checkboxes
+    editorContent.querySelectorAll('.checkbox-item').forEach(item => {
+        const checkbox = item.querySelector('.task-checkbox');
+        const content = item.querySelector('.checkbox-content');
+        if (checkbox && content) {
+            checkbox.addEventListener('change', () => {
+                content.classList.toggle('completed', checkbox.checked);
+                saveCurrent();
+            });
+        }
+    });
 }
 function setupInfiniteScroll(panel, content) {
     let isScrolling = false;
@@ -881,7 +894,7 @@ function applyFormat(command, value = null) {
             document.execCommand(
                 "insertHTML",
                 false,
-                "<table border='1' style='border-collapse: collapse'><tr><td>Cell1</td><td>Cell2</td></tr><tr><td>Cell3</td><td>Cell4'></td></tr></table>"
+                "<table border='1' style='border-collapse: collapse'><tr><td>Cell1</td><td>Cell2</td></tr><tr><td>Cell3'></td><td>Cell4'></td></tr></table>"
             );
             break;
         case "highlight":
@@ -890,6 +903,54 @@ function applyFormat(command, value = null) {
         case "blockquote":
             document.execCommand("formatBlock", false, "BLOCKQUOTE");
             break;
+        case "insertCheckbox":
+            const selection = window.getSelection();
+            const range = selection.getRangeAt(0);
+
+            // Créer un nouvel élément li avec une checkbox améliorée
+            const li = document.createElement('li');
+            li.className = 'checkbox-item';
+
+            // Utiliser data-checked pour suivre l'état
+            li.innerHTML = `
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" class="task-checkbox">
+                    <span class="checkbox-content" contenteditable="true">Nouvelle tâche</span>
+                </div>
+            `;
+
+            // Trouver ou créer la liste parent
+            let ul = range.commonAncestorContainer;
+            while (ul && ul.nodeName !== 'UL') {
+                ul = ul.parentNode;
+            }
+
+            if (!ul || !ul.classList.contains('checkbox-list')) {
+                ul = document.createElement('ul');
+                ul.className = 'checkbox-list';
+                range.insertNode(ul);
+            }
+
+            ul.appendChild(li);
+
+            // Configurer les événements de la checkbox
+            const checkbox = li.querySelector('.task-checkbox');
+            const content = li.querySelector('.checkbox-content');
+
+            checkbox.addEventListener('change', () => {
+                content.classList.toggle('completed', checkbox.checked);
+                saveCurrent();
+            });
+
+            // Sélectionner le texte pour édition immédiate
+            const textRange = document.createRange();
+            textRange.selectNodeContents(content);
+            selection.removeAllRanges();
+            selection.addRange(textRange);
+            break;
+        case "insertTOC":
+            generateTableOfContents();
+            break;
         default:
             // Commandes natives
             document.execCommand(command, false, value);
@@ -897,6 +958,15 @@ function applyFormat(command, value = null) {
     updateFormatButtonStates();
     saveCurrent();
 }
+
+// Ajouter un gestionnaire d'événements pour les checkbox
+document.addEventListener('click', (e) => {
+    if (e.target.matches('.checkbox-item input[type="checkbox"]')) {
+        // Sauvegarder l'état quand une checkbox est cochée/décochée
+        saveCurrent();
+    }
+});
+
 function updateFormatButtonStates() {
     document.querySelectorAll(".format-btn").forEach((btn) => {
         const format = btn.dataset.format;
@@ -1988,4 +2058,119 @@ async function exportToPDF() {
         console.error('Erreur lors de l\'export PDF:', error);
         showToast("Erreur lors de l'export PDF", "error");
     }
+}
+
+// Modifier la fonction generateTableOfContents
+function generateTableOfContents() {
+    const editorContent = document.getElementById("editorContent");
+    if (!editorContent) return;
+
+    const existingTOC = editorContent.querySelector('.toc-container');
+    if (existingTOC) {
+        existingTOC.remove();
+    }
+
+    const headings = editorContent.querySelectorAll('h1, h2, h3');
+    if (headings.length === 0) {
+        showToast("Aucun titre trouvé pour générer la table des matières", "info");
+        return;
+    }
+
+    const tocContainer = document.createElement('div');
+    tocContainer.className = 'toc-container';
+    tocContainer.innerHTML = `
+        <div class="toc-title">
+            <i class="fas fa-list-ol"></i>
+            Table des matières
+        </div>
+        <ul class="toc-list"></ul>
+    `;
+
+    const tocList = tocContainer.querySelector('.toc-list');
+
+    headings.forEach((heading, index) => {
+        const headingId = `heading-${index}`;
+        heading.id = headingId;
+
+        // Récupérer le contenu de la section jusqu'au prochain titre
+        let previewContent = '';
+        let nextElement = heading.nextElementSibling;
+        while (nextElement && !['H1', 'H2', 'H3'].includes(nextElement.tagName)) {
+            previewContent += nextElement.innerText + ' ';
+            nextElement = nextElement.nextElementSibling;
+        }
+
+        // Limiter la longueur de la prévisualisation
+        const truncatedPreview = previewContent.slice(0, 200) + (previewContent.length > 200 ? '...' : '');
+
+        const li = document.createElement('li');
+        li.className = 'toc-item';
+        li.setAttribute('data-level', heading.tagName.toLowerCase());
+
+        // Ajouter le tooltip de prévisualisation
+        li.innerHTML = `
+            <span class="toc-link" data-target="${headingId}">
+                ${heading.textContent}
+                <div class="toc-preview-tooltip">
+                    <div class="toc-preview-content">
+                        <strong>${heading.textContent}</strong>
+                        <p>${truncatedPreview}</p>
+                    </div>
+                </div>
+            </span>
+        `;
+
+        // Gérer la position du tooltip
+        const link = li.querySelector('.toc-link');
+        link.addEventListener('mouseenter', (e) => {
+            const tooltip = link.querySelector('.toc-preview-tooltip');
+            const rect = link.getBoundingClientRect();
+            const spaceBelow = window.innerHeight - rect.bottom;
+            const spaceRight = window.innerWidth - rect.right;
+
+            // Positionner le tooltip en fonction de l'espace disponible
+            if (spaceBelow < 220) { // 200px hauteur + 20px marge
+                tooltip.style.bottom = '100%';
+                tooltip.style.top = 'auto';
+            } else {
+                tooltip.style.top = '100%';
+                tooltip.style.bottom = 'auto';
+            }
+
+            if (spaceRight < 320) { // 300px largeur + 20px marge
+                tooltip.style.right = '0';
+                tooltip.style.left = 'auto';
+            } else {
+                tooltip.style.left = '100%';
+                tooltip.style.right = 'auto';
+            }
+
+            tooltip.classList.add('visible');
+        });
+
+        link.addEventListener('mouseleave', (e) => {
+            const tooltip = link.querySelector('.toc-preview-tooltip');
+            tooltip.classList.remove('visible');
+        });
+
+        link.addEventListener('click', () => {
+            heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+
+        // Empêcher le lien de se fermer pendant le scroll
+        const tooltip = li.querySelector('.toc-preview-tooltip');
+        tooltip.addEventListener('mousewheel', (e) => {
+            e.stopPropagation();
+        });
+
+        tooltip.addEventListener('wheel', (e) => {
+            e.stopPropagation();
+        });
+
+        tocList.appendChild(li);
+    });
+
+    editorContent.insertBefore(tocContainer, editorContent.firstChild);
+    saveCurrent();
+    showToast("Table des matières générée", "success");
 }
