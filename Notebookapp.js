@@ -103,6 +103,82 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("closeHistorySidebarBtn")?.addEventListener("click", () => {
         document.getElementById("historySidebar").classList.remove("open");
     });
+
+    // Todo List Sidebar
+    document.getElementById("toggleTodoSidebarBtn")?.addEventListener("click", () => {
+        document.getElementById("todoSidebar").classList.add("open");
+        loadTodos();
+    });
+
+    document.getElementById("closeTodoSidebarBtn")?.addEventListener("click", () => {
+        document.getElementById("todoSidebar").classList.remove("open");
+    });
+
+    // Todo List functionality
+    document.getElementById("addTodoBtn")?.addEventListener("click", addTodo);
+    document.getElementById("todoInput")?.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") addTodo();
+    });
+
+    // Todo List Filters
+    document.getElementById('todoFilter')?.addEventListener('change', (e) => {
+        const dateFilter = document.getElementById('dueDateFilter').value;
+        loadTodos(e.target.value, dateFilter);
+    });
+
+    document.getElementById('dueDateFilter')?.addEventListener('change', (e) => {
+        const statusFilter = document.getElementById('todoFilter').value;
+        loadTodos(statusFilter, e.target.value);
+    });
+
+    // Todo List Sidebar - Ajout des listeners
+    const toggleTodoSidebarBtn = document.getElementById("toggleTodoSidebar");
+    const closeTodoSidebarBtn = document.getElementById("closeTodoSidebarBtn");
+    const todoInput = document.getElementById("todoInput");
+    const addTodoBtn = document.getElementById("addTodoBtn");
+    const todoFilter = document.getElementById("todoFilter");
+    const dueDateFilter = document.getElementById("dueDateFilter");
+
+    if (toggleTodoSidebarBtn) {
+        toggleTodoSidebarBtn.addEventListener("click", () => {
+            const todoSidebar = document.getElementById("todoSidebar");
+            todoSidebar.classList.add("open");
+            loadTodos(); // Charger les todos lors de l'ouverture
+        });
+    }
+
+    if (closeTodoSidebarBtn) {
+        closeTodoSidebarBtn.addEventListener("click", () => {
+            const todoSidebar = document.getElementById("todoSidebar");
+            todoSidebar.classList.remove("open");
+        });
+    }
+
+    if (addTodoBtn) {
+        addTodoBtn.addEventListener("click", addTodo);
+    }
+
+    if (todoInput) {
+        todoInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") {
+                addTodo();
+            }
+        });
+    }
+
+    if (todoFilter) {
+        todoFilter.addEventListener("change", () => {
+            const dateFilter = dueDateFilter ? dueDateFilter.value : 'all';
+            loadTodos(todoFilter.value, dateFilter);
+        });
+    }
+
+    if (dueDateFilter) {
+        dueDateFilter.addEventListener("change", () => {
+            const statusFilter = todoFilter ? todoFilter.value : 'all';
+            loadTodos(statusFilter, dueDateFilter.value);
+        });
+    }
 });
 
 /****************************
@@ -2173,4 +2249,312 @@ function generateTableOfContents() {
     editorContent.insertBefore(tocContainer, editorContent.firstChild);
     saveCurrent();
     showToast("Table des matières générée", "success");
+}
+
+// ----------------------------
+// Load & Render Todos
+// ----------------------------
+async function loadTodos(filter = 'all', dateFilter = 'all') {
+    try {
+        // Build the base query
+        let query = supabase
+            .from('todos')
+            .select('*')
+            .eq('user_id', currentUserId);
+
+        // Filter by status
+        if (filter === 'pending') {
+            query = query.eq('completed', false).eq('archived', false);
+        } else if (filter === 'completed') {
+            query = query.eq('completed', true).eq('archived', false);
+        } else if (filter === 'archived') {
+            query = query.eq('archived', true);
+        } else {
+            // Default: show non-archived todos
+            query = query.eq('archived', false);
+        }
+
+        // Filter by date
+        const now = new Date();
+        if (dateFilter === 'today') {
+            const today = new Date().toISOString().split('T')[0];
+            // Create a new Date object for tomorrow to avoid mutating `now`
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const tomorrowStr = tomorrow.toISOString().split('T')[0];
+            query = query.gte('due_date', today).lt('due_date', tomorrowStr);
+        } else if (dateFilter === 'week') {
+            const nextWeek = new Date();
+            nextWeek.setDate(nextWeek.getDate() + 7);
+            query = query.lte('due_date', nextWeek.toISOString());
+        } else if (dateFilter === 'month') {
+            const nextMonth = new Date();
+            nextMonth.setMonth(nextMonth.getMonth() + 1);
+            query = query.lte('due_date', nextMonth.toISOString());
+        } else if (dateFilter === 'overdue') {
+            query = query.lt('due_date', new Date().toISOString());
+        }
+
+        // Execute the query
+        const { data: todos, error } = await query.order('created_at', { ascending: false });
+        if (error) throw error;
+
+        // Display the todos in the list
+        const todoList = document.getElementById('todoList');
+        if (!todoList) return;
+
+        todoList.innerHTML = '';
+
+        if (!todos || todos.length === 0) {
+            todoList.innerHTML = `
+        <li class="todo-empty">
+          <i class="fas fa-tasks"></i>
+          <p>Aucune tâche</p>
+        </li>
+      `;
+            return;
+        }
+
+        todos.forEach(todo => {
+            const li = createTodoElement(todo);
+            todoList.appendChild(li);
+        });
+
+    } catch (err) {
+        console.error('Erreur loadTodos:', err);
+        showToast('Erreur lors du chargement des tâches', 'error');
+    }
+}
+
+// ----------------------------
+// Create a Todo DOM Element
+// ----------------------------
+function createTodoElement(todo) {
+    const li = document.createElement('li');
+    const urgencyClass = getUrgencyClass(todo.due_date);
+    li.className = `todo-item ${todo.completed ? 'completed' : ''} ${urgencyClass}`;
+    li.dataset.todoId = todo.id;
+
+    li.innerHTML = `
+    <input type="checkbox" class="todo-checkbox" ${todo.completed ? 'checked' : ''}>
+    <div class="todo-content">
+      <p class="todo-text">${escapeHtml(todo.text)}</p>
+      ${todo.due_date ? `
+        <span class="todo-date ${urgencyClass}">
+          <i class="fas fa-clock"></i> ${formatDueDate(todo.due_date)}
+        </span>
+      ` : ''}
+    </div>
+    <div class="todo-actions">
+      <button class="todo-action-btn edit" title="Modifier">
+        <i class="fas fa-edit"></i>
+      </button>
+      <button class="todo-action-btn archive" title="Archiver">
+        <i class="fas fa-archive"></i>
+      </button>
+      <button class="todo-action-btn delete" title="Supprimer">
+        <i class="fas fa-trash-alt"></i>
+      </button>
+    </div>
+  `;
+
+    // Add event listeners to the todo element
+    setupTodoListeners(li, todo);
+
+    return li;
+}
+
+// ----------------------------
+// Setup Event Listeners
+// ----------------------------
+function setupTodoListeners(li, todo) {
+    const checkbox = li.querySelector('.todo-checkbox');
+    const textEl = li.querySelector('.todo-text');
+    const editBtn = li.querySelector('.todo-action-btn.edit');
+    const archiveBtn = li.querySelector('.todo-action-btn.archive');
+    const deleteBtn = li.querySelector('.todo-action-btn.delete');
+
+    // Toggle complete status
+    checkbox.addEventListener('change', async (e) => {
+        await toggleTodoComplete(todo.id, e.target.checked);
+        li.classList.toggle('completed', e.target.checked);
+    });
+
+    // Edit todo text
+    let isEditing = false;
+    editBtn.addEventListener('click', () => {
+        isEditing = !isEditing;
+        textEl.contentEditable = isEditing;
+        editBtn.innerHTML = isEditing ?
+            '<i class="fas fa-check"></i>' :
+            '<i class="fas fa-edit"></i>';
+
+        if (isEditing) {
+            textEl.focus();
+        } else {
+            updateTodoText(todo.id, textEl.textContent);
+        }
+    });
+
+    // Archive todo
+    archiveBtn.addEventListener('click', async () => {
+        if (confirm('Voulez-vous archiver cette tâche ?')) {
+            await archiveTodo(todo.id);
+            await loadTodos();
+        }
+    });
+
+    // Delete todo
+    deleteBtn.addEventListener('click', async () => {
+        if (confirm('Voulez-vous supprimer cette tâche ?')) {
+            await deleteTodo(todo.id);
+            await loadTodos();
+        }
+    });
+}
+
+// ----------------------------
+// Helper Functions
+// ----------------------------
+
+// Escape HTML to prevent XSS
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Format due date (customize as needed)
+function formatDueDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString();
+}
+
+// Determine urgency class based on the due date
+function getUrgencyClass(dueDate) {
+    if (!dueDate) return '';
+
+    const now = new Date();
+    const due = new Date(dueDate);
+    const diffDays = Math.ceil((due - now) / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) return 'urgent';
+    if (diffDays <= 2) return 'warning';
+    return '';
+}
+
+// Show a toast notification (this is a simple example; replace with your own implementation)
+function showToast(message, type) {
+    // For now, we simply log it to the console.
+    console.log(`[${type.toUpperCase()}] ${message}`);
+}
+
+// ----------------------------
+// Supabase CRUD Operations
+// ----------------------------
+
+// Toggle the completed status of a todo
+async function toggleTodoComplete(todoId, completed) {
+    try {
+        const { error } = await supabase
+            .from('todos')
+            .update({ completed })
+            .eq('id', todoId)
+            .eq('user_id', currentUserId);
+
+        if (error) throw error;
+        showToast(completed ? 'Tâche terminée' : 'Tâche à faire', 'success');
+    } catch (err) {
+        console.error('Erreur toggleTodoComplete:', err);
+        showToast('Erreur lors de la mise à jour', 'error');
+    }
+}
+
+// Update the text of a todo
+async function updateTodoText(todoId, newText) {
+    try {
+        const { error } = await supabase
+            .from('todos')
+            .update({ text: newText })
+            .eq('id', todoId)
+            .eq('user_id', currentUserId);
+
+        if (error) throw error;
+        showToast('Tâche modifiée', 'success');
+    } catch (err) {
+        console.error('Erreur updateTodoText:', err);
+        showToast('Erreur lors de la mise à jour', 'error');
+    }
+}
+
+// Archive a todo
+async function archiveTodo(todoId) {
+    try {
+        const { error } = await supabase
+            .from('todos')
+            .update({ archived: true })
+            .eq('id', todoId)
+            .eq('user_id', currentUserId);
+
+        if (error) throw error;
+        showToast('Tâche archivée', 'success');
+    } catch (err) {
+        console.error('Erreur archiveTodo:', err);
+        showToast('Erreur lors de l\'archivage', 'error');
+    }
+}
+
+// Delete a todo
+async function deleteTodo(todoId) {
+    try {
+        const { error } = await supabase
+            .from('todos')
+            .delete()
+            .eq('id', todoId)
+            .eq('user_id', currentUserId);
+
+        if (error) throw error;
+        showToast('Tâche supprimée', 'success');
+    } catch (err) {
+        console.error('Erreur deleteTodo:', err);
+        showToast('Erreur lors de la suppression', 'error');
+    }
+}
+
+// ----------------------------
+// Adding a New Todo
+// ----------------------------
+async function addTodo() {
+    const input = document.getElementById('todoInput');
+    const dueDateInput = document.getElementById('todoDueDate');
+    const text = input.value.trim();
+    const dueDate = dueDateInput.value;
+
+    if (!text) return;
+
+    try {
+        const newTodo = {
+            id: crypto.randomUUID(), // Generate a unique ID
+            user_id: currentUserId,
+            text: text,
+            due_date: dueDate || null,
+            completed: false,
+            archived: false,
+            created_at: new Date().toISOString()
+        };
+
+        const { error } = await supabase
+            .from('todos')
+            .insert([newTodo]);
+
+        if (error) throw error;
+
+        input.value = '';
+        dueDateInput.value = '';
+        await loadTodos();
+        showToast('Tâche ajoutée', 'success');
+    } catch (err) {
+        console.error('Erreur addTodo:', err);
+        showToast('Erreur lors de l\'ajout', 'error');
+    }
 }

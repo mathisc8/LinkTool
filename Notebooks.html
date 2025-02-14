@@ -3,24 +3,25 @@
 
 <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Notes Pro - OneNote/Notion-like (amélioré)</title>
     <!-- FontAwesome pour les icônes -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-    <!-- DOMPurify pour sécuriser l'insertion de HTML (sanitizing) -->
+    <!-- DOMPurify pour sécuriser l'insertion de HTML -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
     <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-    <!-- jsPDF + prise en charge de la méthode html() -->
-    <!-- Inclure html2canvas -->
+    <!-- html2canvas et jsPDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <!-- Inclure jsPDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <link rel="styleSheet" href="notebookstyle.css" />
-    <script src="Notebookapp.js"></script>
+    <!-- Feuille de style personnalisée -->
+    <link rel="stylesheet" href="notebookstyle.css" />
+    <!-- Script de l'application (JS fonctionne déjà) -->
+    <script src="Notebookapp.js" defer></script>
 </head>
 
 <body>
-    <!-- Barre de navigation principale -->
+    <!-- HEADER -->
     <header class="header">
         <div class="header__left">
             <div class="brand">
@@ -71,12 +72,13 @@
             <button class="theme-toggle" id="themeToggle" title="Changer le thème">
                 <i class="fas fa-sun"></i>
             </button>
-
-            <!-- Bouton pour la nouvelle fonctionnalité : Historique -->
             <button class="action-btn" id="toggleHistorySidebarBtn" title="Historique des versions">
                 <i class="fas fa-history"></i>
             </button>
-
+            <button class="btn-todo" id="toggleTodoSidebar" title="Todo List">
+                <i class="fas fa-tasks"></i>
+                <span>Todo List</span>
+            </button>
             <div class="user-menu">
                 <button class="user-btn">
                     <i class="fas fa-user-circle"></i>
@@ -85,8 +87,9 @@
         </div>
     </header>
 
+    <!-- MAIN -->
     <div class="main">
-        <!-- SIDEBAR GAUCHE : liste des Notebooks -->
+        <!-- SIDEBAR GAUCHE : Notebooks -->
         <aside class="sidebar left-sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="sidebar-title">
@@ -106,12 +109,12 @@
         <section class="content-area">
             <!-- Barre de navigation hiérarchique -->
             <nav class="hierarchy" id="hierarchyPath">
-                <!-- Le chemin (Notebook > Note > Page) sera injecté ici -->
+                <!-- Chemin Notebook > Note > Page injecté ici -->
             </nav>
 
-            <!-- Disposition en 2 colonnes : notes/pages à gauche, éditeur à droite -->
+            <!-- Disposition en 2 colonnes : listes à gauche, éditeur à droite -->
             <div class="main-content-grid">
-                <!-- Colonne Notes & Pages -->
+                <!-- COLONNE LISTES -->
                 <div class="lists-column">
                     <!-- Bloc des Notes -->
                     <div class="notes-panel">
@@ -120,10 +123,9 @@
                             <button class="btn btn-sm" onclick="createNote()">+ Note</button>
                         </div>
                         <div id="notesList" class="panel-body">
-                            <!-- Liste des notes injectée ici -->
+                            <!-- Liste des notes -->
                         </div>
                     </div>
-
                     <!-- Bloc des Pages -->
                     <div class="pages-panel">
                         <div class="panel-header">
@@ -131,16 +133,16 @@
                             <button class="btn btn-sm" onclick="createPage()">+ Page</button>
                         </div>
                         <div id="pagesList" class="panel-body">
-                            <!-- Liste des pages injectée ici -->
+                            <!-- Liste des pages -->
                         </div>
                     </div>
                 </div>
-
-                <!-- Colonne Editeur -->
+                <!-- COLONNE ÉDITEUR -->
                 <div class="editor-container" id="editorContainer">
-                    <!-- Barre de progression pour la lecture du contenu -->
+                    <!-- Barre de progression de défilement -->
                     <div class="scroll-progress" id="scrollProgress"></div>
 
+                    <!-- Barre d'outils de l'éditeur -->
                     <div class="editor-toolbar">
                         <div class="format-group">
                             <button class="format-btn" data-format="bold" data-tooltip="Gras (Ctrl+B)">
@@ -155,7 +157,6 @@
                             <button class="format-btn" data-format="strikethrough" data-tooltip="Barré">
                                 <i class="fas fa-strikethrough"></i>
                             </button>
-                            <!-- Couleur du texte -->
                             <button class="format-btn color-picker-btn" data-format="foreColor"
                                 data-tooltip="Couleur du texte" style="position: relative;">
                                 <i class="fas fa-palette"></i>
@@ -183,7 +184,6 @@
                             <button class="format-btn" data-format="insertOrderedList" data-tooltip="Liste numérotée">
                                 <i class="fas fa-list-ol"></i>
                             </button>
-                            <!-- Ajouter ce nouveau bouton -->
                             <button class="format-btn" data-format="insertCheckbox" data-tooltip="Liste à cocher">
                                 <i class="fas fa-check-square"></i>
                             </button>
@@ -201,7 +201,6 @@
                             </button>
                         </div>
 
-                        <!-- NOUVELLES OPTIONS : Alignement, Citation, Surlignage -->
                         <div class="format-group">
                             <button class="format-btn" data-format="justifyLeft" data-tooltip="Aligner à gauche">
                                 <i class="fas fa-align-left"></i>
@@ -220,7 +219,6 @@
                             </button>
                         </div>
 
-                        <!-- Bouton Export PDF -->
                         <div class="format-group">
                             <button class="format-btn" id="exportPdfBtn" data-tooltip="Exporter en PDF">
                                 <i class="fas fa-file-export"></i>
@@ -228,7 +226,6 @@
                         </div>
 
                         <div class="format-group">
-                            <!-- Ajouter après les autres boutons -->
                             <button class="format-btn" data-format="insertTOC"
                                 data-tooltip="Générer table des matières">
                                 <i class="fas fa-list-ol"></i>
@@ -237,6 +234,7 @@
                         </div>
                     </div>
 
+                    <!-- Zone d'édition -->
                     <div class="editor-panel" id="editorPanel">
                         <div id="editorTitle" contenteditable="true" data-placeholder="Entrez un titre..."
                             class="editor-title"></div>
@@ -244,17 +242,15 @@
                             class="editor-content"></div>
                     </div>
 
-                    <!-- Footer de l'éditeur (ex: compteur de mots, plein écran) -->
+                    <!-- Footer de l'éditeur -->
                     <div class="editor-footer">
                         <span class="word-count" id="wordCount">0 mots</span>
-                        <div>
-                            <button class="btn-fullscreen" id="toggleFullscreen">
-                                <i class="fas fa-expand"></i> Plein écran
-                            </button>
-                        </div>
+                        <button class="btn-fullscreen" id="toggleFullscreen">
+                            <i class="fas fa-expand"></i> Plein écran
+                        </button>
                     </div>
 
-                    <!-- État vide (quand aucune note/page n'est sélectionnée) -->
+                    <!-- État vide -->
                     <div class="empty-state" id="emptyState">
                         <i class="fas fa-book-open"></i>
                         <h3>Aucune sélection</h3>
@@ -264,18 +260,20 @@
             </div>
         </section>
 
-        <!-- SIDEBAR DROITE : Favoris (collapsible) -->
-        <aside class="right-sidebar collapsed" id="favoritesSidebar">
+        <!-- SIDEBAR DROITE : Favoris -->
+        <aside class="sidebar right-sidebar collapsed" id="favoritesSidebar">
             <div class="favorites-section">
-                <h2><i class="fas fa-star"></i> Favoris</h2>
+                <h2>
+                    <i class="fas fa-star"></i> Favoris
+                </h2>
                 <ul class="favorite-list" id="favoritesList">
-                    <!-- Items favoris injectés ici -->
+                    <!-- Items favoris -->
                 </ul>
             </div>
         </aside>
     </div>
 
-    <!-- Nouvelle sidebar Historique des versions -->
+    <!-- SIDEBAR HISTORIQUE -->
     <aside class="history-sidebar" id="historySidebar">
         <div class="history-header">
             <h2><i class="fas fa-history"></i> Historique</h2>
@@ -284,15 +282,47 @@
             </button>
         </div>
         <ul class="history-list" id="historyList">
-            <!-- Versions précédentes injectées ici -->
+            <!-- Versions précédentes -->
         </ul>
     </aside>
 
-    <!-- Footer -->
+    <!-- SIDEBAR TODO -->
+    <div class="todo-sidebar" id="todoSidebar">
+        <div class="todo-header">
+            <h2>Todo List</h2>
+            <button class="action-btn" id="closeTodoSidebarBtn">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="todo-input-container">
+            <input type="text" id="todoInput" class="todo-input" placeholder="Nouvelle tâche..." />
+            <input type="date" id="todoDueDate" />
+            <button class="btn" id="addTodoBtn">Ajouter</button>
+        </div>
+        <div class="todo-filters">
+            <select id="todoFilter" class="todo-filter">
+                <option value="all">Tous</option>
+                <option value="pending">En cours</option>
+                <option value="completed">Terminés</option>
+                <option value="archived">Archivés</option>
+            </select>
+            <select id="dueDateFilter" class="todo-filter">
+                <option value="all">Toutes dates</option>
+                <option value="today">Aujourd'hui</option>
+                <option value="week">Cette semaine</option>
+                <option value="month">Ce mois</option>
+                <option value="overdue">En retard</option>
+            </select>
+        </div>
+        <ul id="todoList" class="todo-list">
+            <!-- Les todos seront insérés ici dynamiquement -->
+        </ul>
+    </div>
+
+    <!-- FOOTER -->
     <footer class="footer">
         <p>2025 - Mon super clone OneNote/Notion - Tous droits réservés</p>
     </footer>
-
 </body>
 
 </html>
