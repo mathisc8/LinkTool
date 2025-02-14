@@ -2537,6 +2537,13 @@ async function deleteTodo(todoId) {
             .eq('user_id', currentUserId);
 
         if (error) throw error;
+
+        // Recharger la liste des projets après suppression
+        await Promise.all([
+            loadProjectOptions(),
+            loadTodos()
+        ]);
+
         showToast('Tâche supprimée', 'success');
     } catch (err) {
         console.error('Erreur deleteTodo:', err);
@@ -2616,7 +2623,12 @@ async function addTodo() {
         projectInput.value = '';
         dueDateInput.value = '';
 
-        await loadTodos();
+        // Recharger la liste des projets et les todos
+        await Promise.all([
+            loadProjectOptions(),
+            loadTodos()
+        ]);
+
         showToast('Tâche ajoutée', 'success');
     } catch (err) {
         console.error('Erreur addTodo:', err);
@@ -2636,21 +2648,28 @@ async function loadProjectOptions() {
         const { data, error } = await supabase
             .from('todos')
             .select('project')
-            .eq('user_id', currentUserId);
+            .eq('user_id', currentUserId)
+            .not('project', 'is', null); // Exclure les projets null
 
         if (error) throw error;
 
-        // Extraire les projets non nuls, uniques
-        const projects = [
-            ...new Set(data.map(item => item.project).filter(Boolean))
-        ];
+        // Extraire les projets uniques
+        const uniqueProjects = [...new Set(data.map(item => item.project))].sort();
 
-        // Conserver "all"
+        // Conserver la sélection actuelle
+        const currentSelection = projectSelect.value;
+
+        // Reconstruire les options
         projectSelect.innerHTML = `<option value="all">Tous projets</option>`;
-        projects.forEach(proj => {
-            projectSelect.innerHTML += `<option value="${escapeHtml(proj)}">${escapeHtml(proj)}</option>`;
+        uniqueProjects.forEach(proj => {
+            projectSelect.innerHTML += `
+                <option value="${escapeHtml(proj)}" ${currentSelection === proj ? 'selected' : ''}>
+                    ${escapeHtml(proj)}
+                </option>
+            `;
         });
     } catch (err) {
         console.error('Erreur loadProjectOptions:', err);
+        showToast('Erreur lors du chargement des projets', 'error');
     }
 }
