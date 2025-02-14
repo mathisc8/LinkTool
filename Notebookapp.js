@@ -104,100 +104,76 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.getElementById("historySidebar").classList.remove("open");
     });
 
-    // Todo List Sidebar
-    document.getElementById("toggleTodoSidebarBtn")?.addEventListener("click", () => {
-        document.getElementById("todoSidebar").classList.add("open");
-        loadTodos();
+    const todoSidebar = document.getElementById('todoSidebar');
+    const toggleTodoSidebarBtn = document.getElementById('toggleTodoSidebar');
+    const closeTodoSidebarBtn = document.getElementById('closeTodoSidebarBtn');
+
+    const addTodoBtn = document.getElementById('addTodoBtn');
+    const clearCompletedBtn = document.getElementById('clearCompletedBtn');
+    const archiveCompletedBtn = document.getElementById('ArchiveCompletedBtn');
+
+
+
+    const projectFilter = document.getElementById('projectFilter');
+    const todoFilter = document.getElementById('todoFilter');
+    const dueDateFilter = document.getElementById('dueDateFilter');
+    const todoSearchInput = document.getElementById('todoSearchInput');
+
+    // Ouvrir la sidebar
+    toggleTodoSidebarBtn.addEventListener('click', () => {
+        todoSidebar.classList.add('open');
+        // Chargement des projets pour le filtre
+        loadProjectOptions();
     });
 
-    document.getElementById("closeTodoSidebarBtn")?.addEventListener("click", () => {
-        document.getElementById("todoSidebar").classList.remove("open");
+    // Fermer la sidebar
+    closeTodoSidebarBtn.addEventListener('click', () => {
+        todoSidebar.classList.remove('open');
     });
 
-    // Todo List functionality
-    document.getElementById("addTodoBtn")?.addEventListener("click", addTodo);
-    document.getElementById("todoInput")?.addEventListener("keypress", (e) => {
-        if (e.key === "Enter") addTodo();
+    // Ajouter une nouvelle tâche
+    addTodoBtn.addEventListener('click', () => {
+        addTodo();
     });
 
-    // Todo List Filters
-    document.getElementById('todoFilter')?.addEventListener('change', (e) => {
-        const dateFilter = document.getElementById('dueDateFilter').value;
-        loadTodos(e.target.value, dateFilter);
+    // Effacer les tâches terminées
+    clearCompletedBtn.addEventListener('click', async () => {
+        if (confirm('Êtes-vous sûr de vouloir supprimer toutes les tâches terminées ?')) {
+            await clearCompletedTodos();
+            await loadTodos();
+        }
     });
 
-    document.getElementById('dueDateFilter')?.addEventListener('change', (e) => {
-        const statusFilter = document.getElementById('todoFilter').value;
-        loadTodos(statusFilter, e.target.value);
+    archiveCompletedBtn.addEventListener('click', async () => {
+        if (confirm('Êtes-vous sûr de vouloir archiver toutes les tâches terminées ?')) {
+            await ArchiveCompletedBtn();
+            await loadTodos();
+        }
     });
 
-    // Todo List Sidebar - Ajout des listeners
-    const toggleTodoSidebarBtn = document.getElementById("toggleTodoSidebar");
-    const closeTodoSidebarBtn = document.getElementById("closeTodoSidebarBtn");
-    const todoInput = document.getElementById("todoInput");
-    const addTodoBtn = document.getElementById("addTodoBtn");
-    const todoFilter = document.getElementById("todoFilter");
-    const dueDateFilter = document.getElementById("dueDateFilter");
+    // Filtres
+    projectFilter.addEventListener('change', () => loadTodos());
+    todoFilter.addEventListener('change', () => loadTodos());
+    dueDateFilter.addEventListener('change', () => loadTodos());
+    todoSearchInput.addEventListener('input', () => loadTodos());
 
-    if (toggleTodoSidebarBtn) {
-        toggleTodoSidebarBtn.addEventListener("click", () => {
-            const todoSidebar = document.getElementById("todoSidebar");
-            todoSidebar.classList.add("open");
-            loadTodos(); // Charger les todos lors de l'ouverture
-        });
-    }
-
-    if (closeTodoSidebarBtn) {
-        closeTodoSidebarBtn.addEventListener("click", () => {
-            const todoSidebar = document.getElementById("todoSidebar");
-            todoSidebar.classList.remove("open");
-        });
-    }
-
-    if (addTodoBtn) {
-        addTodoBtn.addEventListener("click", addTodo);
-    }
-
-    if (todoInput) {
-        todoInput.addEventListener("keypress", (e) => {
-            if (e.key === "Enter") {
-                addTodo();
-            }
-        });
-    }
-
-    if (todoFilter) {
-        todoFilter.addEventListener("change", () => {
-            const dateFilter = dueDateFilter ? dueDateFilter.value : 'all';
-            loadTodos(todoFilter.value, dateFilter);
-        });
-    }
-
-    if (dueDateFilter) {
-        dueDateFilter.addEventListener("change", () => {
-            const statusFilter = todoFilter ? todoFilter.value : 'all';
-            loadTodos(statusFilter, dueDateFilter.value);
-        });
-    }
+    // Chargement initial
+    loadTodos();
 });
 
 /****************************
  * Vérification de l'authentification (exemple)
  ****************************/
 async function checkAuth() {
-    // Exemple fictif
-    const {
-        data: { user },
-    } = await supabase.auth.getUser();
-
+    const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-        console.log("Utilisateur non connecté (démo).");
-        // Vous pourriez rediriger vers un login
-    } else {
-        currentUserId = user.id;
+        window.location.href = 'login.html';
+        return false;
     }
+    // Stocke l'id de l'utilisateur connecté dans la variable globale
+    currentUserId = user.id;
+    return user;
 }
-
 /****************************
  * Gestion du thème
  ****************************/
@@ -214,7 +190,7 @@ function toggleTheme() {
     updateThemeIcon(newTheme);
 }
 function updateThemeIcon(theme) {
-    const icon = document.querySelector(".theme-toggle i");
+    const icon = document.querySelector(".selectTheme i");
     if (icon) {
         icon.className = theme === "dark" ? "fas fa-moon" : "fas fa-sun";
     }
@@ -1985,89 +1961,102 @@ async function exportToPDF() {
         tempContainer.style.width = '800px';
         tempContainer.style.padding = '40px';
         tempContainer.style.background = 'white';
-        tempContainer.style.color = '#000';  // Force le texte en noir
+        tempContainer.style.color = '#000';
         tempContainer.style.position = 'absolute';
         tempContainer.style.left = '-9999px';
+        tempContainer.style.top = '0';
 
         // Style CSS optimisé pour le PDF
         const styleSheet = `
-                    * {
-                        font-family: Arial, sans-serif;
-                        line-height: 1.5;
-                        color: #000 !important;
-                    }
-                    h1, h2, h3 { margin: 1em 0 0.5em 0; }
-                    h1 { font-size: 24px; }
-                    h2 { font-size: 20px; }
-                    h3 { font-size: 16px; }
-                    p { margin: 0.5em 0; }
-                    img { 
-                        max-width: 100%; 
-                        margin: 1em auto; 
-                        display: block;
-                    }
-                    table {
-                        width: 100%;
-                        border-collapse: collapse;
-                        margin: 1em 0;
-                    }
-                    td, th {
-                        border: 1px solid #ddd;
-                        padding: 8px;
-                    }
-                    blockquote {
-                        margin: 1em 0;
-                        padding: 10px 20px;
-                        border-left: 5px solid #ddd;
-                        background: #f9f9f9;
-                    }
-                    ul, ol {
-                        margin: 0.5em 0;
-                        padding-left: 20px;
-                    }
-                    code, pre {
-                        background: #f5f5f5;
-                        padding: 2px 5px;
-                        border-radius: 3px;
-                        font-family: monospace;
-                    }
-                `;
+            * {
+                font-family: Arial, sans-serif;
+                line-height: 1.5;
+                color: #000 !important;
+                box-sizing: border-box;
+            }
+            h1, h2, h3 { margin: 1em 0 0.5em 0; }
+            h1 { font-size: 24px; }
+            h2 { font-size: 20px; }
+            h3 { font-size: 16px; }
+            p { margin: 0.5em 0; }
+            img { 
+                max-width: 100%; 
+                margin: 1em auto; 
+                display: block;
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 1em 0;
+            }
+            td, th {
+                border: 1px solid #ddd;
+                padding: 8px;
+            }
+            blockquote {
+                margin: 1em 0;
+                padding: 10px 20px;
+                border-left: 5px solid #ddd;
+                background: #f9f9f9;
+            }
+            ul, ol {
+                margin: 0.5em 0;
+                padding-left: 20px;
+            }
+            code, pre {
+                background: #f5f5f5;
+                padding: 2px 5px;
+                border-radius: 3px;
+                font-family: monospace;
+            }
+        `;
 
         // Ajout du style et du contenu
         tempContainer.innerHTML = `
-                    <style>${styleSheet}</style>
-                    <div class="pdf-header" style="margin-bottom: 30px; text-align: center;">
-                        <h1 style="font-size: 28px; color: #2563eb !important; margin-bottom: 10px;">
-                            ${editorTitle.textContent || "Document sans titre"}
-                        </h1>
-                        <div style="font-size: 12px; color: #666 !important;">
-                            Exporté le ${new Date().toLocaleString()}
-                        </div>
-                    </div>
-                    <div class="pdf-content">
-                        ${editorContent.innerHTML}
-                    </div>
-                `;
+            <style>${styleSheet}</style>
+            <div class="pdf-header" style="margin-bottom: 30px; text-align: center;">
+                <h1 style="font-size: 28px; color: #2563eb !important; margin-bottom: 10px;">
+                    ${editorTitle.textContent || "Document sans titre"}
+                </h1>
+                <div style="font-size: 12px; color: #666 !important;">
+                    Exporté le ${new Date().toLocaleString()}
+                </div>
+            </div>
+            <div class="pdf-content">
+                ${editorContent.innerHTML}
+            </div>
+        `;
 
         document.body.appendChild(tempContainer);
 
         // Indicateur de chargement
         const loadingIndicator = document.createElement('div');
         loadingIndicator.className = 'loading-indicator';
+        loadingIndicator.style.position = 'fixed';
+        loadingIndicator.style.top = '50%';
+        loadingIndicator.style.left = '50%';
+        loadingIndicator.style.transform = 'translate(-50%, -50%)';
+        loadingIndicator.style.padding = '20px';
+        loadingIndicator.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+        loadingIndicator.style.color = '#fff';
+        loadingIndicator.style.borderRadius = '5px';
         loadingIndicator.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Génération du PDF en cours...';
         document.body.appendChild(loadingIndicator);
 
         try {
+            // Attendre un petit délai pour s'assurer que tout est bien rendu (images, etc.)
+            await new Promise((resolve) => setTimeout(resolve, 300));
+
             // Options de conversion optimisées
             const canvas = await html2canvas(tempContainer, {
-                scale: 2,
-                useCORS: true,
+                scale: 3,         // Augmentation de la résolution pour un rendu plus net
+                useCORS: true,    // Autorise la récupération d’images cross-origin
                 logging: false,
-                allowTaint: true,
+                allowTaint: false,
                 backgroundColor: '#FFFFFF'
             });
 
-            // Initialiser jsPDF avec des marges optimisées
+            // Initialiser jsPDF
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF({
                 orientation: 'portrait',
@@ -2076,35 +2065,37 @@ async function exportToPDF() {
                 compress: true
             });
 
-            // Dimensions et marges
+            // Dimensions PDF
             const pageWidth = pdf.internal.pageSize.getWidth();
             const pageHeight = pdf.internal.pageSize.getHeight();
-            const margin = 15;  // Marge en mm
+            const margin = 10;   // marges de gauche et de droite
             const usableWidth = pageWidth - (2 * margin);
 
             // Conversion du canvas en image
             const imgData = canvas.toDataURL('image/jpeg', 1.0);
-            const imgWidth = usableWidth;
-            const imgHeight = canvas.height * imgWidth / canvas.width;
 
+            // Calcul de la hauteur finale en gardant le ratio
+            const imgWidth = usableWidth;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+            let position = 0;
             let heightLeft = imgHeight;
-            let position = margin;  // Position Y initiale
             let pageNumber = 1;
 
             // Ajouter l'image page par page
             pdf.addImage(imgData, 'JPEG', margin, position, imgWidth, imgHeight);
-            heightLeft -= (pageHeight - 2 * margin);
+            heightLeft -= (pageHeight - margin * 2);
 
             // Gestion des pages multiples
-            while (heightLeft >= 0) {
-                position = heightLeft - imgHeight;
+            while (heightLeft > 0) {
+                position = - (imgHeight - heightLeft) + margin; // Décalage pour la page suivante
                 pdf.addPage();
                 pdf.addImage(imgData, 'JPEG', margin, position, imgWidth, imgHeight);
-                heightLeft -= (pageHeight - 2 * margin);
+                heightLeft -= (pageHeight - margin * 2);
                 pageNumber++;
             }
 
-            // Ajouter les numéros de page
+            // Ajouter les numéros de page (optionnel)
             for (let i = 1; i <= pageNumber; i++) {
                 pdf.setPage(i);
                 pdf.setFontSize(8);
@@ -2112,7 +2103,7 @@ async function exportToPDF() {
                 pdf.text(
                     `Page ${i} sur ${pageNumber}`,
                     pageWidth / 2,
-                    pageHeight - 10,
+                    pageHeight - 5,
                     { align: 'center' }
                 );
             }
@@ -2127,14 +2118,15 @@ async function exportToPDF() {
         } finally {
             // Nettoyage
             document.body.removeChild(tempContainer);
-            loadingIndicator.remove();
+            document.body.removeChild(loadingIndicator);
         }
 
     } catch (error) {
-        console.error('Erreur lors de l\'export PDF:', error);
+        console.error("Erreur lors de l'export PDF:", error);
         showToast("Erreur lors de l'export PDF", "error");
     }
 }
+
 
 // Modifier la fonction generateTableOfContents
 function generateTableOfContents() {
@@ -2250,68 +2242,83 @@ function generateTableOfContents() {
     saveCurrent();
     showToast("Table des matières générée", "success");
 }
-
-// ----------------------------
-// Load & Render Todos
-// ----------------------------
-async function loadTodos(filter = 'all', dateFilter = 'all') {
+/****************************************************
+  Charger et afficher les todos
+*****************************************************/
+async function loadTodos() {
     try {
-        // Build the base query
+        const projectValue = document.getElementById('projectFilter').value;
+        const statusValue = document.getElementById('todoFilter').value;
+        const dateValue = document.getElementById('dueDateFilter').value;
+        const searchValue = document.getElementById('todoSearchInput').value.trim().toLowerCase();
+
+        // Construction de la requête de base
         let query = supabase
             .from('todos')
             .select('*')
             .eq('user_id', currentUserId);
 
-        // Filter by status
-        if (filter === 'pending') {
+        // Filtrer par projet
+        if (projectValue !== 'all') {
+            query = query.eq('project', projectValue);
+        }
+
+        // Filtrer par statut
+        if (statusValue === 'pending') {
             query = query.eq('completed', false).eq('archived', false);
-        } else if (filter === 'completed') {
+        } else if (statusValue === 'completed') {
             query = query.eq('completed', true).eq('archived', false);
-        } else if (filter === 'archived') {
+        } else if (statusValue === 'archived') {
             query = query.eq('archived', true);
         } else {
-            // Default: show non-archived todos
+            // Par défaut : on affiche les todos non archivés
             query = query.eq('archived', false);
         }
 
-        // Filter by date
+        // Filtre par date
         const now = new Date();
-        if (dateFilter === 'today') {
-            const today = new Date().toISOString().split('T')[0];
-            // Create a new Date object for tomorrow to avoid mutating `now`
+        if (dateValue === 'today') {
+            const today = now.toISOString().split('T')[0];
             const tomorrow = new Date();
             tomorrow.setDate(tomorrow.getDate() + 1);
             const tomorrowStr = tomorrow.toISOString().split('T')[0];
             query = query.gte('due_date', today).lt('due_date', tomorrowStr);
-        } else if (dateFilter === 'week') {
+        } else if (dateValue === 'week') {
             const nextWeek = new Date();
             nextWeek.setDate(nextWeek.getDate() + 7);
             query = query.lte('due_date', nextWeek.toISOString());
-        } else if (dateFilter === 'month') {
+        } else if (dateValue === 'month') {
             const nextMonth = new Date();
             nextMonth.setMonth(nextMonth.getMonth() + 1);
             query = query.lte('due_date', nextMonth.toISOString());
-        } else if (dateFilter === 'overdue') {
-            query = query.lt('due_date', new Date().toISOString());
+        } else if (dateValue === 'overdue') {
+            query = query.lt('due_date', now.toISOString());
         }
 
-        // Execute the query
-        const { data: todos, error } = await query.order('created_at', { ascending: false });
+        // Récupération des données
+        let { data: todos, error } = await query.order('created_at', { ascending: false });
         if (error) throw error;
 
-        // Display the todos in the list
-        const todoList = document.getElementById('todoList');
-        if (!todoList) return;
+        // Filtrer par texte (search) côté client,
+        // si vous préférez, vous pouvez aussi gérer la recherche côté serveur
+        if (searchValue) {
+            todos = todos.filter(todo =>
+                todo.text.toLowerCase().includes(searchValue) ||
+                (todo.project && todo.project.toLowerCase().includes(searchValue))
+            );
+        }
 
+        // Affichage
+        const todoList = document.getElementById('todoList');
         todoList.innerHTML = '';
 
         if (!todos || todos.length === 0) {
             todoList.innerHTML = `
-        <li class="todo-empty">
-          <i class="fas fa-tasks"></i>
-          <p>Aucune tâche</p>
-        </li>
-      `;
+          <li class="todo-empty">
+            <i class="fas fa-tasks"></i>
+            <p>Aucune tâche</p>
+          </li>
+        `;
             return;
         }
 
@@ -2319,54 +2326,65 @@ async function loadTodos(filter = 'all', dateFilter = 'all') {
             const li = createTodoElement(todo);
             todoList.appendChild(li);
         });
-
     } catch (err) {
         console.error('Erreur loadTodos:', err);
         showToast('Erreur lors du chargement des tâches', 'error');
     }
 }
 
-// ----------------------------
-// Create a Todo DOM Element
-// ----------------------------
+/****************************************************
+  Créer un élément DOM pour une tâche
+*****************************************************/
 function createTodoElement(todo) {
     const li = document.createElement('li');
     const urgencyClass = getUrgencyClass(todo.due_date);
+
     li.className = `todo-item ${todo.completed ? 'completed' : ''} ${urgencyClass}`;
     li.dataset.todoId = todo.id;
 
+    // Badge projet si nécessaire
+    const projectBadge = todo.project
+        ? `<span class="todo-project-badge">${escapeHtml(todo.project)}</span>`
+        : '';
+
     li.innerHTML = `
-    <input type="checkbox" class="todo-checkbox" ${todo.completed ? 'checked' : ''}>
-    <div class="todo-content">
-      <p class="todo-text">${escapeHtml(todo.text)}</p>
-      ${todo.due_date ? `
-        <span class="todo-date ${urgencyClass}">
-          <i class="fas fa-clock"></i> ${formatDueDate(todo.due_date)}
-        </span>
-      ` : ''}
-    </div>
-    <div class="todo-actions">
-      <button class="todo-action-btn edit" title="Modifier">
-        <i class="fas fa-edit"></i>
-      </button>
-      <button class="todo-action-btn archive" title="Archiver">
-        <i class="fas fa-archive"></i>
-      </button>
-      <button class="todo-action-btn delete" title="Supprimer">
-        <i class="fas fa-trash-alt"></i>
-      </button>
-    </div>
-  `;
+      <input 
+        type="checkbox" 
+        class="todo-checkbox" 
+        ${todo.completed ? 'checked' : ''}>
+      
+      <div class="todo-content">
+        <p class="todo-text">
+          ${projectBadge} ${escapeHtml(todo.text)}
+        </p>
+        ${todo.due_date
+            ? `<span class="todo-date ${urgencyClass}">
+                 <i class="fas fa-clock"></i> ${formatDueDate(todo.due_date)}
+               </span>`
+            : ''
+        }
+      </div>
+  
+      <div class="todo-actions">
+        <button class="todo-action-btn edit" title="Modifier">
+          <i class="fas fa-edit"></i>
+        </button>
+        <button class="todo-action-btn archive" title="Archiver">
+          <i class="fas fa-archive"></i>
+        </button>
+        <button class="todo-action-btn delete" title="Supprimer">
+          <i class="fas fa-trash-alt"></i>
+        </button>
+      </div>
+    `;
 
-    // Add event listeners to the todo element
     setupTodoListeners(li, todo);
-
     return li;
 }
 
-// ----------------------------
-// Setup Event Listeners
-// ----------------------------
+/****************************************************
+  Gestion des événements sur une tâche
+*****************************************************/
 function setupTodoListeners(li, todo) {
     const checkbox = li.querySelector('.todo-checkbox');
     const textEl = li.querySelector('.todo-text');
@@ -2374,86 +2392,91 @@ function setupTodoListeners(li, todo) {
     const archiveBtn = li.querySelector('.todo-action-btn.archive');
     const deleteBtn = li.querySelector('.todo-action-btn.delete');
 
-    // Toggle complete status
+    // Cocher/décocher
     checkbox.addEventListener('change', async (e) => {
         await toggleTodoComplete(todo.id, e.target.checked);
         li.classList.toggle('completed', e.target.checked);
     });
 
-    // Edit todo text
+    // Édition de la tâche (texte)
     let isEditing = false;
-    editBtn.addEventListener('click', () => {
+    editBtn.addEventListener('click', async () => {
         isEditing = !isEditing;
         textEl.contentEditable = isEditing;
-        editBtn.innerHTML = isEditing ?
-            '<i class="fas fa-check"></i>' :
-            '<i class="fas fa-edit"></i>';
+        editBtn.innerHTML = isEditing
+            ? '<i class="fas fa-check"></i>'
+            : '<i class="fas fa-edit"></i>';
 
         if (isEditing) {
+            // Focus à la fin du texte
+            const range = document.createRange();
+            range.selectNodeContents(textEl);
+            range.collapse(false);
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
             textEl.focus();
         } else {
-            updateTodoText(todo.id, textEl.textContent);
+            // Sauvegarder
+            const textSansBadge = textEl.textContent.trim();
+            await updateTodoText(todo.id, textSansBadge);
         }
     });
 
-    // Archive todo
+    // Archiver
     archiveBtn.addEventListener('click', async () => {
-        if (confirm('Voulez-vous archiver cette tâche ?')) {
+        if (confirm('Voulez-vous archiver cette tâche ?')) {
             await archiveTodo(todo.id);
             await loadTodos();
         }
     });
 
-    // Delete todo
+    // Supprimer
     deleteBtn.addEventListener('click', async () => {
-        if (confirm('Voulez-vous supprimer cette tâche ?')) {
+        if (confirm('Voulez-vous supprimer cette tâche ?')) {
             await deleteTodo(todo.id);
             await loadTodos();
         }
     });
 }
 
-// ----------------------------
-// Helper Functions
-// ----------------------------
-
-// Escape HTML to prevent XSS
+/****************************************************
+  Fonctions utilitaires
+*****************************************************/
+// Échappe le HTML
 function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
 }
 
-// Format due date (customize as needed)
+// Formatage de date
 function formatDueDate(dateString) {
     const date = new Date(dateString);
     return date.toLocaleDateString();
 }
 
-// Determine urgency class based on the due date
+// Calcul de l'urgence
 function getUrgencyClass(dueDate) {
     if (!dueDate) return '';
-
     const now = new Date();
     const due = new Date(dueDate);
     const diffDays = Math.ceil((due - now) / (1000 * 60 * 60 * 24));
 
-    if (diffDays < 0) return 'urgent';
-    if (diffDays <= 2) return 'warning';
+    if (diffDays < 0) return 'urgent';     // Dépassé
+    if (diffDays <= 2) return 'warning';  // Très proche
     return '';
 }
 
-// Show a toast notification (this is a simple example; replace with your own implementation)
+// Notification simple
 function showToast(message, type) {
-    // For now, we simply log it to the console.
     console.log(`[${type.toUpperCase()}] ${message}`);
 }
 
-// ----------------------------
-// Supabase CRUD Operations
-// ----------------------------
-
-// Toggle the completed status of a todo
+/****************************************************
+  Opérations CRUD avec Supabase
+****************************************************/
+// Basculer l'état complété
 async function toggleTodoComplete(todoId, completed) {
     try {
         const { error } = await supabase
@@ -2470,7 +2493,7 @@ async function toggleTodoComplete(todoId, completed) {
     }
 }
 
-// Update the text of a todo
+// Mettre à jour le texte
 async function updateTodoText(todoId, newText) {
     try {
         const { error } = await supabase
@@ -2487,7 +2510,7 @@ async function updateTodoText(todoId, newText) {
     }
 }
 
-// Archive a todo
+// Archiver
 async function archiveTodo(todoId) {
     try {
         const { error } = await supabase
@@ -2500,11 +2523,11 @@ async function archiveTodo(todoId) {
         showToast('Tâche archivée', 'success');
     } catch (err) {
         console.error('Erreur archiveTodo:', err);
-        showToast('Erreur lors de l\'archivage', 'error');
+        showToast("Erreur lors de l'archivage", 'error');
     }
 }
 
-// Delete a todo
+// Supprimer
 async function deleteTodo(todoId) {
     try {
         const { error } = await supabase
@@ -2521,22 +2544,62 @@ async function deleteTodo(todoId) {
     }
 }
 
-// ----------------------------
-// Adding a New Todo
-// ----------------------------
+// Effacer toutes les tâches terminées
+async function clearCompletedTodos() {
+    try {
+        const { error } = await supabase
+            .from('todos')
+            .delete()
+            .eq('completed', true)
+            .eq('archived', false)
+            .eq('user_id', currentUserId);
+
+        if (error) throw error;
+        showToast('Toutes les tâches terminées ont été supprimées', 'success');
+    } catch (err) {
+        console.error('Erreur clearCompletedTodos:', err);
+        showToast('Erreur lors de la suppression des tâches terminées', 'error');
+    }
+}
+
+async function ArchiveCompletedBtn() {
+    try {
+        const { error } = await supabase
+            .from('todos')
+            .update({ archived: true })
+            .eq('completed', true)
+            .eq('archived', false)
+            .eq('user_id', currentUserId);
+
+        if (error) throw error;
+        showToast('Toutes les tâches terminées ont été archivées', 'success');
+    } catch (err) {
+        console.error('Erreur ArchiveCompletedBtn:', err);
+        showToast('Erreur lors de l’archivage des tâches terminées', 'error');
+    }
+}
+
+/****************************************************
+  Ajouter une nouvelle tâche
+*****************************************************/
 async function addTodo() {
     const input = document.getElementById('todoInput');
+    const projectInput = document.getElementById('todoProject');
     const dueDateInput = document.getElementById('todoDueDate');
+
     const text = input.value.trim();
+    const project = projectInput.value.trim();
     const dueDate = dueDateInput.value;
 
     if (!text) return;
 
     try {
+        // Génération d’un ID unique (si supporté par l’environnement)
         const newTodo = {
-            id: crypto.randomUUID(), // Generate a unique ID
+            id: crypto.randomUUID(),
             user_id: currentUserId,
-            text: text,
+            text,
+            project: project || null,
             due_date: dueDate || null,
             completed: false,
             archived: false,
@@ -2550,11 +2613,44 @@ async function addTodo() {
         if (error) throw error;
 
         input.value = '';
+        projectInput.value = '';
         dueDateInput.value = '';
+
         await loadTodos();
         showToast('Tâche ajoutée', 'success');
     } catch (err) {
         console.error('Erreur addTodo:', err);
-        showToast('Erreur lors de l\'ajout', 'error');
+        showToast("Erreur lors de l'ajout", 'error');
+    }
+}
+
+/****************************************************
+  Charger les projets dans la liste de sélection
+*****************************************************/
+async function loadProjectOptions() {
+    const projectSelect = document.getElementById('projectFilter');
+    if (!projectSelect) return;
+
+    try {
+        // Récupère la liste distincte des projets
+        const { data, error } = await supabase
+            .from('todos')
+            .select('project')
+            .eq('user_id', currentUserId);
+
+        if (error) throw error;
+
+        // Extraire les projets non nuls, uniques
+        const projects = [
+            ...new Set(data.map(item => item.project).filter(Boolean))
+        ];
+
+        // Conserver "all"
+        projectSelect.innerHTML = `<option value="all">Tous projets</option>`;
+        projects.forEach(proj => {
+            projectSelect.innerHTML += `<option value="${escapeHtml(proj)}">${escapeHtml(proj)}</option>`;
+        });
+    } catch (err) {
+        console.error('Erreur loadProjectOptions:', err);
     }
 }

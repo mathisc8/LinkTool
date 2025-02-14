@@ -69,21 +69,15 @@
                     <i class="fas fa-star"></i>
                 </button>
             </div>
-            <button class="theme-toggle" id="themeToggle" title="Changer le thème">
+            <button class="action-btn selectTheme" id="themeToggle" title="Changer le thème">
                 <i class="fas fa-sun"></i>
             </button>
             <button class="action-btn" id="toggleHistorySidebarBtn" title="Historique des versions">
                 <i class="fas fa-history"></i>
             </button>
-            <button class="btn-todo" id="toggleTodoSidebar" title="Todo List">
+            <button class="action-btn" id="toggleTodoSidebar" title="Todo List">
                 <i class="fas fa-tasks"></i>
-                <span>Todo List</span>
             </button>
-            <div class="user-menu">
-                <button class="user-btn">
-                    <i class="fas fa-user-circle"></i>
-                </button>
-            </div>
         </div>
     </header>
 
@@ -288,24 +282,42 @@
 
     <!-- SIDEBAR TODO -->
     <div class="todo-sidebar" id="todoSidebar">
+        <!-- HEADER DE LA SIDEBAR -->
         <div class="todo-header">
             <h2>Todo List</h2>
-            <button class="action-btn" id="closeTodoSidebarBtn">
+            <button class="action-btn close-btn" id="closeTodoSidebarBtn">
                 <i class="fas fa-times"></i>
             </button>
         </div>
+
+        <!-- BARRE DE RECHERCHE -->
+        <div class="todo-search-container">
+            <input type="text" id="todoSearchInput" class="todo-search-input" placeholder="Rechercher une tâche..." />
+            <i class="fas fa-search search-icon"></i>
+        </div>
+
+        <!-- FORMULAIRE D'AJOUT DE TÂCHE -->
         <div class="todo-input-container">
             <input type="text" id="todoInput" class="todo-input" placeholder="Nouvelle tâche..." />
-            <input type="date" id="todoDueDate" />
+            <input type="text" id="todoProject" class="todo-project" placeholder="Projet (optionnel)" />
+            <input type="date" id="todoDueDate" class="todo-due-date" />
             <button class="btn" id="addTodoBtn">Ajouter</button>
         </div>
+
+        <!-- FILTRES -->
         <div class="todo-filters">
+            <select id="projectFilter" class="todo-filter">
+                <option value="all">Tous projets</option>
+                <!-- Options de projets alimentées dynamiquement -->
+            </select>
+
             <select id="todoFilter" class="todo-filter">
-                <option value="all">Tous</option>
+                <option value="all">Tous statuts</option>
                 <option value="pending">En cours</option>
                 <option value="completed">Terminés</option>
                 <option value="archived">Archivés</option>
             </select>
+
             <select id="dueDateFilter" class="todo-filter">
                 <option value="all">Toutes dates</option>
                 <option value="today">Aujourd'hui</option>
@@ -314,14 +326,27 @@
                 <option value="overdue">En retard</option>
             </select>
         </div>
+
+        <!-- LISTE DES TÂCHES -->
         <ul id="todoList" class="todo-list">
             <!-- Les todos seront insérés ici dynamiquement -->
         </ul>
+
+        <!-- BOUTON SUPPLÉMENTAIRE -->
+        <div class="todo-footer">
+            <button class="btn-clear-completed" id="clearCompletedBtn">
+                Effacer les tâches terminées
+            </button>
+            <button class="btn-clear-completed" id="ArchiveCompletedBtn">
+                Archiver les tâches terminées
+            </button>
+        </div>
     </div>
+
 
     <!-- FOOTER -->
     <footer class="footer">
-        <p>2025 - Mon super clone OneNote/Notion - Tous droits réservés</p>
+        <p>2025 - Noty - Tous droits réservés</p>
     </footer>
 </body>
 
